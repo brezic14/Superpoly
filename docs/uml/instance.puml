@@ -1,0 +1,81 @@
+@startuml Instances
+
+
+interface hasMoney{
+    - name : String
+    + giveMoney(money : float) : void
+    + dispay() : String
+}
+
+class Room{
+    - nbPlayerMax : int
+    - codeRoom : String
+    - 
+}
+
+class Game {
+    - playersAlive : List<Player>
+    - eventBus : EventBus
+}
+
+class Player implements EventListener {
+    - money : float
+    - lapDone : int
+    - square : int
+    - cities : List<City>
+    - privileges : List<Privilege>
+    + rollDice() : int
+    + onEvent(event : GameEvent) : void
+}
+
+class MoneyPot {
+    - amount : float
+}
+
+class Country {
+    - name : String
+    - cities : List<City>
+}
+
+class City {
+    - name : String
+    - purchasePrice : float
+    - sellingPrice : float
+    - rent : float
+    - upgrade : int
+    - country : Country
+}
+
+abstract class LuckyCard implements EventListener {
+    - name : String
+    - description : String
+    + onEvent(event : GameEvent) : void
+}
+
+' ==========================================
+' PATTERN EVENT BUS
+' ==========================================
+
+class EventBus {
+    - listeners : Map<Class, List<EventListener>>
+    + subscribe(eventType : Class, listener : EventListener) : void
+    + unsubscribe(eventType : Class, listener : EventListener) : void
+    + publish(event : GameEvent) : void
+}
+
+interface EventListener {
+    + onEvent(event : GameEvent) : void
+}
+
+abstract class GameEvent {
+    - timestamp : long
+    - sourcePlayer : Player
+    + getSourcePlayer() : Player
+}
+
+hasMoney <-- Player
+hasMoney <-- Bank
+hasMoney <-- MoneyPot
+
+
+@enduml

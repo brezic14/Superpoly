@@ -1,0 +1,60 @@
+@startuml Lobby
+' Salon réseau — volontairement séparé du métier pur (instance.puml).
+' Option B (Vercel serverless) : pas de socket persistant.
+' Transport = REST (/api/rooms/*) + polling client 2s, stockage partagé
+' Upstash Redis (repli mémoire en dev local uniquement).
+
+class LobbyRoom {
+  - code : String <<#212A4B>>
+  - maxPlayers : int = 5
+  - status : WAITING | STARTING
+  - players : List<LobbyPlayer>
+  - version : int
+  - createdAt : long
+}
+
+class LobbyPlayer {
+  - id : String <<public, pour kick>>
+  - pseudo : String
+  - token : String <<secret, jamais exposé>>
+  - isHost : bool
+  - joinedAt : long
+}
+
+class LobbyService {
+  + createRoom(name) : {room, me}
+  + joinRoom(code, name) : {room, me}
+  + getState(code, token) : RoomView
+  + leaveRoom(code, token) : void
+  + kickPlayer(code, token, targetId) : RoomView
+  + startRoom(code, token) : RoomView + gamePlayers
+}
+
+interface RoomStore {
+  + get(code) : LobbyRoom
+  + save(room) : void
+  + remove(code) : void
+  + exists(code) : bool
+}
+
+class MemoryRoomStore {
+  ' dev local uniquement
+}
+
+class UpstashRoomStore {
+  ' prod serverless (REST Redis, TTL 6h)
+}
+
+LobbyRoom "1" *-- "1..5" LobbyPlayer
+LobbyService ..> RoomStore
+MemoryRoomStore ..|> RoomStore
+UpstashRoomStore ..|> RoomStore
+
+note right of LobbyRoom
+  Code = '#' + 6 x [0-9A-Z]
+  Hôte = 1er arrivé (isHost)
+  Hôte qui quitte -> doyen promu
+  Démarrer: hôte seul, >= 2 joueurs
+  Kick: hôte seul, par id joueur
+end note
+@enduml

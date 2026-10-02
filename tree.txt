@@ -1,0 +1,25 @@
+Superpoly/
+├── client/                 # Application Vue.js
+│   ├── public/             # Fichiers statiques (images, favicon, etc.)
+│   ├── src/                # Code source Vue.js
+│   │   ├── assets/         # Images du plateau, pions, cartes
+│   │   ├── components/     # Composants (Plateau, Case, Des, JoueurCard)
+│   │   ├── stores/         # Gestion d'état Pinia (store socket, store jeu)
+│   │   ├── App.vue         # Composant racine
+│   │   └── main.js         # Point d'entrée Vue.js
+│   ├── package.json        # Dépendances du front-end
+│   └── vite.config.js      # Configuration Vite / Vue
+│
+├── server/                 # Application Node.js (Back-end)
+│   ├── src/                # Code source du serveur
+│   │   ├── game/           # Logique métier du jeu (Règles, Plateau, Banque)
+│   │   ├── sockets/        # Gestionnaires d'événements Socket.io
+│   │   └── index.js        # Point d'entrée du serveur Node.js
+│   ├── package.json        # Dépendances du back-end
+│   └── .env                # Variables d'environnement (PORT, clés, etc.)
+│
+├── .gitignore              # Fichiers à ignorer par Git (node_modules, .env)
+├── package.json            # (Optionnel) Scripts globaux pour lancer client + serveur
+└── README.md               # Documentation du projet
+
+
