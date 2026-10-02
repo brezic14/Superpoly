@@ -10,3 +10,15 @@ Le joueur qui a créer la partie est considéré comme l'"hote" et les autres "i
 Réalise un plan permettant de répondre à ce but.
 
 Seul le système de sallon est la page d'acceuil doivent être modélisé.
+
+
+
+
+Reste à faire côté Vercel (impossible depuis ici)
+1. Dashboard Vercel → projet → Settings → Environment Variables → ajouter :
+- UPSTASH_REDIS_REST_URL = https://full-mosquito-225689.upstash.io
+- UPSTASH_REDIS_REST_TOKEN = le token que tu viens de me donner
+- Environnements : Production + Preview (cochés).
+2. Deployments → Redeploy le dernier déploiement pour que les fonctions api/* prennent les variables.
+3. Tester sur https://superpoly.vercel.app : créer une partie dans un navigateur, rejoindre avec le code dans un second (ou onglet privé) — la liste doit se synchroniser via le polling.
+Note : garde le token hors du chat/git à l'avenir — il est maintenant uniquement dans ton server/.env local et (après l'étape 1) dans Vercel.

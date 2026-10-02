@@ -81,10 +81,15 @@ export class UpstashRoomStore {
 
 let singleton = null;
 
+/** Indique le backend de stockage actif (diagnostic, sans secret). */
+export function storageKind() {
+  return UPSTASH_REDIS_REST_URL && UPSTASH_REDIS_REST_TOKEN ? 'upstash' : 'memory';
+}
+
 /** Retourne le store partagé : Upstash si configuré, sinon mémoire (dev local). */
 export function getStore() {
   if (singleton) return singleton;
-  if (UPSTASH_REDIS_REST_URL && UPSTASH_REDIS_REST_TOKEN) {
+  if (storageKind() === 'upstash') {
     singleton = new UpstashRoomStore();
   } else {
     singleton = new MemoryRoomStore();
