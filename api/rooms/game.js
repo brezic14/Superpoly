@@ -1,7 +1,7 @@
-import { getGameState } from '../../../server/src/game/service.js';
-import { normalizeCode } from '../../../server/src/lobby/code.js';
-import { ServiceError } from '../../../server/src/lobby/service.js';
-import { withCors } from '../../_lib.js';
+import { getGameState } from '../../server/src/game/service.js';
+import { normalizeCode } from '../../server/src/lobby/code.js';
+import { ServiceError } from '../../server/src/lobby/service.js';
+import { withCors } from '../_lib.js';
 
 export default withCors(async (req, res, store) => {
   if (req.method !== 'GET') return res.status(405).json({ ok: false, code: 'METHOD', message: 'GET attendu.' });
