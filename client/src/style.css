@@ -87,12 +87,12 @@ main { flex: 1; display: flex; justify-content: center; }
 /* ---- Interface de jeu (cf. frame debut_tour / lancement_des) ---- */
 .game-layout {
   display: grid;
-  grid-template-columns: 150px 1fr 220px;
+  grid-template-columns: 150px 1fr 230px;
   gap: 0;
   border: 3px solid var(--border);
   margin: 12px;
   min-height: calc(100vh - 120px);
-  width: min(1400px, 98vw);
+  width: min(1600px, 98vw);
 }
 .game-left {
   border-right: 3px solid var(--border);
@@ -132,8 +132,7 @@ main { flex: 1; display: flex; justify-content: center; }
 .board-wrap {
   position: relative;
   width: 100%;
-  max-width: 900px;
-  aspect-ratio: 1168 / 758;
+  aspect-ratio: 1003 / 701;
   user-select: none;
 }
 .board-img { width: 100%; height: 100%; display: block; }

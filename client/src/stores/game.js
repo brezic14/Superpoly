@@ -8,15 +8,23 @@ export const BOARD_SIZE = 57;
 export const STEP_MS = 250;
 
 async function api(path, { method = 'GET', body } = {}) {
-  const res = await fetch(`${API_BASE}/api/rooms/${path}`, {
-    method,
-    headers: { 'Content-Type': 'application/json' },
-    body: body === undefined ? undefined : JSON.stringify(body),
-  });
+  let res;
+  try {
+    res = await fetch(`${API_BASE}/api/rooms/${path}`, {
+      method,
+      headers: { 'Content-Type': 'application/json' },
+      body: body === undefined ? undefined : JSON.stringify(body),
+    });
+  } catch {
+    const err = new Error('Serveur injoignable. Vérifie qu’il est démarré.');
+    err.code = 'NETWORK';
+    throw err;
+  }
   const json = await res.json().catch(() => ({}));
   if (!res.ok || json.ok === false) {
-    const err = new Error(json.message ?? 'Erreur partie.');
-    err.code = json.code ?? 'UNKNOWN';
+    // Message serveur si présent, sinon code explicite (ex. 404 = route absente).
+    const err = new Error(json.message ?? `Erreur partie (${json.code ?? `HTTP ${res.status}`}).`);
+    err.code = json.code ?? `HTTP_${res.status}`;
     throw err;
   }
   return json;
