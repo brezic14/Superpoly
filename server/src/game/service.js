@@ -1,4 +1,5 @@
 import { ServiceError } from '../lobby/service.js';
+import { publicChat, pushSystemMessage } from '../chat/utils.js';
 
 /**
  * Moteur de jeu MVP — déplacement seul (aucun effet de case).
@@ -18,7 +19,7 @@ import { ServiceError } from '../lobby/service.js';
 export const BOARD_SIZE = 57;
 export const START_MONEY = 200000;
 /** Case "simple visite / prison" (coin haut-gauche du plateau visuel). */
-export const PRISON_SQUARE = 29;
+export const PRISON_SQUARE = 7;
 
 export const PION_COLORS = ['#FF0000', '#1E6FFF', '#00C800', '#FFD800', '#FF00FF'];
 
@@ -137,7 +138,14 @@ export function rollDice(room, { token, randomFn = Math.random } = {}) {
   g.version += 1;
   room.version += 1;
 
-  return { d1, d2, total, game: publicGame(room, me.id) };
+  // Message système (italique côté client) : « Riri a fait 7 (3 + 4). »
+  const roller = g.players[me.id];
+  let rollText = `${roller.pseudo} a fait ${total} (${d1} + ${d2}).`;
+  if (sentToPrison) rollText += ' Direction prison !';
+  else if (mustRollAgain) rollText += ' Double, rejoue !';
+  pushSystemMessage(room, rollText);
+
+  return { d1, d2, total, game: publicGame(room, me.id), chat: publicChat(room) };
 }
 
 /** État jeu pour un membre (polling). */

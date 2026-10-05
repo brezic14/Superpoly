@@ -114,14 +114,31 @@ main { flex: 1; display: flex; justify-content: center; }
   background: #d9d9d9;
   border: 1px solid #999;
   display: flex;
-  align-items: center;
-  justify-content: center;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  gap: 4px;
   font-size: 13px;
   min-height: 300px;
+  max-height: calc(100vh - 260px);
+  overflow-y: auto;
+  padding: 8px;
 }
+.chat-empty { color: #666; text-align: center; margin: auto 0; }
+.chat-msg { margin: 0; overflow-wrap: anywhere; }
+.chat-system { margin: 0; color: #555; overflow-wrap: anywhere; }
+.chat-error { color: #b00020; font-size: 12px; margin: 0; }
 .chat-input { display: flex; align-items: center; gap: 6px; }
 .chat-box { min-width: 0; flex: 1; font-size: 14px; padding: 8px; }
 .chat-send { font-size: 22px; color: #999; }
+.chat-send-btn {
+  border: 1px solid var(--border);
+  background: #f2f2f2;
+  font-size: 18px;
+  padding: 6px 10px;
+  cursor: pointer;
+}
+.chat-send-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 .game-center {
   display: flex;
   align-items: center;

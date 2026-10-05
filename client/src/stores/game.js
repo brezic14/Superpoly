@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia';
 import { computed, ref } from 'vue';
 import { useRoomStore } from './room.js';
+import { useChatStore } from './chat.js';
 import board from '../data/board.json';
 
 const API_BASE = (import.meta.env.VITE_SERVER_URL ?? '').replace(/\/$/, '');
@@ -140,6 +141,7 @@ export const useGameStore = defineStore('game', () => {
     try {
       const json = await api('roll', { method: 'POST', body: { code: r.code, token: r.myToken } });
       applyGame(json.game);
+      if (json.chat) useChatStore().applyChat(json.chat);
     } catch (e) {
       error.value = e.message ?? 'Lancer impossible.';
     } finally {

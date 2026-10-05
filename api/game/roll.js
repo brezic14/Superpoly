@@ -10,7 +10,7 @@ export default withCors(async (req, res, store) => {
   if (!code) throw new ServiceError('INVALID_CODE');
   const room = await store.get(code);
   if (!room) throw new ServiceError('ROOM_NOT_FOUND', 404);
-  const { d1, d2, total, game } = rollDice(room, { token });
+  const { d1, d2, total, game, chat } = rollDice(room, { token });
   await store.save(room);
-  res.json({ ok: true, d1, d2, total, game });
+  res.json({ ok: true, d1, d2, total, game, chat });
 });

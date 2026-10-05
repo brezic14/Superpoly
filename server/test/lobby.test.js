@@ -85,10 +85,15 @@ describe('service salon (REST, sans socket)', () => {
     assert.equal(state.players.find((p) => p.isHost).pseudo, 'J1');
   });
 
-  it('kick réservé hôte, démarrage >= 2 joueurs', async () => {
+  it('kick réservé hôte, démarrage >= 1 joueur', async () => {
     const store = freshStore();
+    // Solo autorisé : l'hôte seul peut démarrer.
+    const solo = await createRoom(store, { name: 'Solo' });
+    const startedSolo = await startRoom(store, { code: solo.room.code, token: solo.me.token });
+    assert.equal(startedSolo.status, 'STARTING');
+    assert.equal(startedSolo.gamePlayers.length, 1);
+
     const { room, me } = await createRoom(store, { name: 'Hote' });
-    await assertFails(startRoom(store, { code: room.code, token: me.token }), 'NEED_2_PLAYERS');
     const j1 = await joinRoom(store, { code: room.code, name: 'J1' });
     await assertFails(kickPlayer(store, { code: room.code, token: j1.me.token, targetId: me.id }), 'NOT_HOST');
     const kicked = await kickPlayer(store, { code: room.code, token: me.token, targetId: j1.me.id });

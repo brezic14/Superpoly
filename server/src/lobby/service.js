@@ -1,4 +1,5 @@
 import { MAX_PLAYERS, NAME_MAX, NAME_MIN } from '../config.js';
+import { ensureChat, publicChat, pushSystemMessage } from '../chat/utils.js';
 import {
   generateCode,
   generatePlayerId,
@@ -25,10 +26,13 @@ export const ERRORS = {
   NOT_HOST: 'Seul l’hôte peut faire ça.',
   CANNOT_KICK_HOST: "On ne peut pas expulser l'hôte.",
   TARGET_NOT_FOUND: 'Joueur introuvable.',
-  NEED_2_PLAYERS: 'Il faut au moins 2 joueurs pour démarrer.',
+  NEED_1_PLAYER: 'Il faut au moins 1 joueur pour démarrer.',
   ALREADY_STARTED: 'La partie a déjà démarré.',
   GAME_NOT_STARTED: 'La partie n’a pas encore démarré.',
   NOT_YOUR_TURN: 'Ce n’est pas à toi de jouer.',
+  CHAT_EMPTY: 'Message vide.',
+  CHAT_TOO_LONG: 'Message trop long (200 caractères max).',
+  CHAT_RATE_LIMIT: 'Doucement, un message à la fois.',
 };
 
 export class ServiceError extends Error {
@@ -52,6 +56,7 @@ export function publicRoom(room) {
     version: room.version,
     players,
     hostId: players.find((p) => p.isHost)?.id ?? null,
+    chat: publicChat(room),
   };
   // Expose un résumé du jeu (positions, tour courant) sans token, pour le polling
   // unique salon+jeu côté client. Le détail complet passe par publicGame().
@@ -104,6 +109,7 @@ export async function createRoom(store, { name, maxPlayers = MAX_PLAYERS }) {
   const now = Date.now();
   const me = { id: generatePlayerId(), pseudo, token: generatePlayerToken(), isHost: true, joinedAt: now };
   const room = { code, maxPlayers, status: 'WAITING', players: [me], createdAt: now, version: 1 };
+  ensureChat(room);
   await store.save(room);
   return { room: publicRoom(room), me: { id: me.id, token: me.token, pseudo: me.pseudo } };
 }
@@ -124,6 +130,7 @@ export async function joinRoom(store, { code: rawCode, name }) {
   const me = { id: generatePlayerId(), pseudo, token: generatePlayerToken(), isHost: false, joinedAt: Date.now() };
   room.players.push(me);
   room.version += 1;
+  pushSystemMessage(room, `${me.pseudo} a rejoint le salon.`);
   await store.save(room);
   return { room: publicRoom(room), me: { id: me.id, token: me.token, pseudo: me.pseudo } };
 }
@@ -147,6 +154,7 @@ export async function leaveRoom(store, { code: rawCode, token }) {
   if (!room) throw new ServiceError('ROOM_NOT_FOUND', 404);
   const idx = room.players.findIndex((p) => p.token === token);
   if (idx === -1) throw new ServiceError('NOT_IN_ROOM', 403);
+  const leaving = room.players[idx];
   room.players.splice(idx, 1);
   promoteOldestIfNeeded(room);
   room.version += 1;
@@ -154,6 +162,7 @@ export async function leaveRoom(store, { code: rawCode, token }) {
     await store.remove(code);
     return { left: true, roomGone: true, code };
   }
+  pushSystemMessage(room, `${leaving.pseudo} a quitté le salon.`);
   await store.save(room);
   return { left: true, roomGone: false, room: publicRoom(room) };
 }
@@ -172,11 +181,12 @@ export async function kickPlayer(store, { code: rawCode, token, targetId }) {
   if (target.isHost) throw new ServiceError('CANNOT_KICK_HOST', 403);
   room.players = room.players.filter((p) => p.id !== targetId);
   room.version += 1;
+  pushSystemMessage(room, `${target.pseudo} a été expulsé par ${me.pseudo}.`);
   await store.save(room);
   return { room: publicRoom(room), kickedId: targetId };
 }
 
-/** Démarre la partie (hôte seul, >= 2 joueurs). */
+/** Démarre la partie (hôte seul, >= 1 joueur). */
 export async function startRoom(store, { code: rawCode, token }) {
   const code = normalizeCode(rawCode);
   if (!code) throw new ServiceError('INVALID_CODE');
@@ -186,12 +196,13 @@ export async function startRoom(store, { code: rawCode, token }) {
   if (!me) throw new ServiceError('NOT_IN_ROOM', 403);
   if (!me.isHost) throw new ServiceError('NOT_HOST', 403);
   if (room.status !== 'WAITING') throw new ServiceError('ALREADY_STARTED', 409);
-  if (room.players.length < 2) throw new ServiceError('NEED_2_PLAYERS', 409);
+  if (room.players.length < 1) throw new ServiceError('NEED_1_PLAYER', 409);
   room.status = 'STARTING';
   // Initialise le moteur de jeu : ordre aléatoire fixe, tous case 0, couleurs.
   const { initGame } = await import('../game/service.js');
   initGame(room);
   room.version += 1;
+  pushSystemMessage(room, 'La partie démarre ! Bonne chance à tous.');
   await store.save(room);
   // Futur pont vers Game métier : ordre / 200 000€ gérés à l'étape plateau.
   return { ...publicRoom(room), gamePlayers: toGamePlayers(room) };

@@ -8,121 +8,121 @@
   },
   {
     "id": 1,
-    "x": 16.1,
-    "y": 90.44,
-    "nom": "Rabat",
+    "x": 6.68,
+    "y": 76.96,
+    "nom": "Milan",
     "type": "ville"
   },
   {
     "id": 2,
-    "x": 23.63,
-    "y": 90.44,
-    "nom": "Gare de Rabat",
-    "type": "gare"
-  },
-  {
-    "id": 3,
-    "x": 31.21,
-    "y": 90.44,
-    "nom": "Fès",
-    "type": "ville"
-  },
-  {
-    "id": 4,
-    "x": 38.73,
-    "y": 90.44,
-    "nom": "Marrakech",
-    "type": "ville"
-  },
-  {
-    "id": 5,
-    "x": 46.26,
-    "y": 90.44,
-    "nom": "Électricité",
-    "type": "service"
-  },
-  {
-    "id": 6,
-    "x": 53.79,
-    "y": 90.44,
-    "nom": "Aéroport Sud",
-    "type": "aeroport"
-  },
-  {
-    "id": 7,
-    "x": 61.32,
-    "y": 90.44,
-    "nom": "New Delhi",
-    "type": "ville"
-  },
-  {
-    "id": 8,
-    "x": 68.89,
-    "y": 90.44,
-    "nom": "Chance",
-    "type": "chance"
-  },
-  {
-    "id": 9,
-    "x": 76.42,
-    "y": 90.44,
-    "nom": "Jaipur",
-    "type": "ville"
-  },
-  {
-    "id": 10,
-    "x": 83.95,
-    "y": 90.44,
-    "nom": "Mumbai",
-    "type": "ville"
-  },
-  {
-    "id": 11,
-    "x": 93.37,
-    "y": 90.44,
-    "nom": "Marché noir",
-    "type": "marche-noir"
-  },
-  {
-    "id": 12,
-    "x": 93.37,
-    "y": 76.96,
-    "nom": "Tokyo",
-    "type": "ville"
-  },
-  {
-    "id": 13,
-    "x": 93.37,
+    "x": 6.68,
     "y": 66.19,
-    "nom": "Hiroshima",
-    "type": "ville"
-  },
-  {
-    "id": 14,
-    "x": 93.37,
-    "y": 55.42,
-    "nom": "Chance",
-    "type": "chance"
-  },
-  {
-    "id": 15,
-    "x": 93.37,
-    "y": 44.65,
-    "nom": "Osaka",
-    "type": "ville"
-  },
-  {
-    "id": 16,
-    "x": 93.37,
-    "y": 33.81,
     "nom": "Taxe",
     "type": "taxe"
   },
   {
-    "id": 17,
-    "x": 93.37,
+    "id": 3,
+    "x": 6.68,
+    "y": 55.42,
+    "nom": "Venise",
+    "type": "ville"
+  },
+  {
+    "id": 4,
+    "x": 6.68,
+    "y": 44.65,
+    "nom": "Chance",
+    "type": "chance"
+  },
+  {
+    "id": 5,
+    "x": 6.68,
+    "y": 33.81,
+    "nom": "Florence",
+    "type": "ville"
+  },
+  {
+    "id": 6,
+    "x": 6.68,
     "y": 23.04,
-    "nom": "Kyoto",
+    "nom": "Rome",
+    "type": "ville"
+  },
+  {
+    "id": 7,
+    "x": 6.68,
+    "y": 9.56,
+    "nom": "Prison / Simple visite",
+    "type": "prison"
+  },
+  {
+    "id": 8,
+    "x": 16.1,
+    "y": 9.56,
+    "nom": "Puebla",
+    "type": "ville"
+  },
+  {
+    "id": 9,
+    "x": 23.63,
+    "y": 9.56,
+    "nom": "Mérida",
+    "type": "ville"
+  },
+  {
+    "id": 10,
+    "x": 31.21,
+    "y": 9.56,
+    "nom": "Chance",
+    "type": "chance"
+  },
+  {
+    "id": 11,
+    "x": 38.73,
+    "y": 9.56,
+    "nom": "Mexico",
+    "type": "ville"
+  },
+  {
+    "id": 12,
+    "x": 46.26,
+    "y": 9.56,
+    "nom": "Aéroport Nord",
+    "type": "aeroport"
+  },
+  {
+    "id": 13,
+    "x": 53.79,
+    "y": 9.56,
+    "nom": "Eau",
+    "type": "service"
+  },
+  {
+    "id": 14,
+    "x": 61.32,
+    "y": 9.56,
+    "nom": "Toronto",
+    "type": "ville"
+  },
+  {
+    "id": 15,
+    "x": 68.89,
+    "y": 9.56,
+    "nom": "Montréal",
+    "type": "ville"
+  },
+  {
+    "id": 16,
+    "x": 76.42,
+    "y": 9.56,
+    "nom": "Gare de Montréal",
+    "type": "gare"
+  },
+  {
+    "id": 17,
+    "x": 83.95,
+    "y": 9.56,
+    "nom": "Ottawa",
     "type": "ville"
   },
   {
@@ -134,121 +134,121 @@
   },
   {
     "id": 19,
-    "x": 83.95,
-    "y": 9.56,
-    "nom": "Puebla",
+    "x": 93.37,
+    "y": 23.04,
+    "nom": "Kyoto",
     "type": "ville"
   },
   {
     "id": 20,
-    "x": 76.42,
-    "y": 9.56,
-    "nom": "Mérida",
-    "type": "ville"
-  },
-  {
-    "id": 21,
-    "x": 68.89,
-    "y": 9.56,
-    "nom": "Chance",
-    "type": "chance"
-  },
-  {
-    "id": 22,
-    "x": 61.32,
-    "y": 9.56,
-    "nom": "Mexico",
-    "type": "ville"
-  },
-  {
-    "id": 23,
-    "x": 53.79,
-    "y": 9.56,
-    "nom": "Aéroport Nord",
-    "type": "aeroport"
-  },
-  {
-    "id": 24,
-    "x": 46.26,
-    "y": 9.56,
-    "nom": "Eau",
-    "type": "service"
-  },
-  {
-    "id": 25,
-    "x": 38.73,
-    "y": 9.56,
-    "nom": "Toronto",
-    "type": "ville"
-  },
-  {
-    "id": 26,
-    "x": 31.21,
-    "y": 9.56,
-    "nom": "Montréal",
-    "type": "ville"
-  },
-  {
-    "id": 27,
-    "x": 23.63,
-    "y": 9.56,
-    "nom": "Gare de Montréal",
-    "type": "gare"
-  },
-  {
-    "id": 28,
-    "x": 16.1,
-    "y": 9.56,
-    "nom": "Ottawa",
-    "type": "ville"
-  },
-  {
-    "id": 29,
-    "x": 6.68,
-    "y": 9.56,
-    "nom": "Prison / Simple visite",
-    "type": "prison"
-  },
-  {
-    "id": 30,
-    "x": 6.68,
-    "y": 23.04,
-    "nom": "Rome",
-    "type": "ville"
-  },
-  {
-    "id": 31,
-    "x": 6.68,
+    "x": 93.37,
     "y": 33.81,
-    "nom": "Florence",
-    "type": "ville"
-  },
-  {
-    "id": 32,
-    "x": 6.68,
-    "y": 44.65,
-    "nom": "Chance",
-    "type": "chance"
-  },
-  {
-    "id": 33,
-    "x": 6.68,
-    "y": 55.42,
-    "nom": "Venise",
-    "type": "ville"
-  },
-  {
-    "id": 34,
-    "x": 6.68,
-    "y": 66.19,
     "nom": "Taxe",
     "type": "taxe"
   },
   {
-    "id": 35,
-    "x": 6.68,
+    "id": 21,
+    "x": 93.37,
+    "y": 44.65,
+    "nom": "Osaka",
+    "type": "ville"
+  },
+  {
+    "id": 22,
+    "x": 93.37,
+    "y": 55.42,
+    "nom": "Chance",
+    "type": "chance"
+  },
+  {
+    "id": 23,
+    "x": 93.37,
+    "y": 66.19,
+    "nom": "Hiroshima",
+    "type": "ville"
+  },
+  {
+    "id": 24,
+    "x": 93.37,
     "y": 76.96,
-    "nom": "Milan",
+    "nom": "Tokyo",
+    "type": "ville"
+  },
+  {
+    "id": 25,
+    "x": 93.37,
+    "y": 90.44,
+    "nom": "Marché noir",
+    "type": "marche-noir"
+  },
+  {
+    "id": 26,
+    "x": 83.95,
+    "y": 90.44,
+    "nom": "Mumbai",
+    "type": "ville"
+  },
+  {
+    "id": 27,
+    "x": 76.42,
+    "y": 90.44,
+    "nom": "Jaipur",
+    "type": "ville"
+  },
+  {
+    "id": 28,
+    "x": 68.89,
+    "y": 90.44,
+    "nom": "Chance",
+    "type": "chance"
+  },
+  {
+    "id": 29,
+    "x": 61.32,
+    "y": 90.44,
+    "nom": "New Delhi",
+    "type": "ville"
+  },
+  {
+    "id": 30,
+    "x": 53.79,
+    "y": 90.44,
+    "nom": "Aéroport Sud",
+    "type": "aeroport"
+  },
+  {
+    "id": 31,
+    "x": 46.26,
+    "y": 90.44,
+    "nom": "Électricité",
+    "type": "service"
+  },
+  {
+    "id": 32,
+    "x": 38.73,
+    "y": 90.44,
+    "nom": "Marrakech",
+    "type": "ville"
+  },
+  {
+    "id": 33,
+    "x": 31.21,
+    "y": 90.44,
+    "nom": "Fès",
+    "type": "ville"
+  },
+  {
+    "id": 34,
+    "x": 23.63,
+    "y": 90.44,
+    "nom": "Gare de Rabat",
+    "type": "gare"
+  },
+  {
+    "id": 35,
+    "x": 16.1,
+    "y": 90.44,
+    "nom": "Rabat",
     "type": "ville"
   },
   {
@@ -260,142 +260,142 @@
   },
   {
     "id": 37,
-    "x": 23.63,
-    "y": 71.54,
-    "nom": "Flèche",
-    "type": "intermediaire"
+    "x": 21.73,
+    "y": 55.42,
+    "nom": "Hambourg",
+    "type": "ville"
   },
   {
     "id": 38,
-    "x": 31.21,
-    "y": 71.54,
-    "nom": "Paris",
-    "type": "ville"
-  },
-  {
-    "id": 39,
-    "x": 38.73,
-    "y": 71.54,
-    "nom": "Chance",
-    "type": "chance"
-  },
-  {
-    "id": 40,
-    "x": 46.26,
-    "y": 71.54,
-    "nom": "Lyon",
-    "type": "ville"
-  },
-  {
-    "id": 41,
-    "x": 53.79,
-    "y": 71.54,
-    "nom": "Lille",
-    "type": "ville"
-  },
-  {
-    "id": 42,
-    "x": 61.32,
-    "y": 71.54,
-    "nom": "Aéroport Centre",
-    "type": "aeroport"
-  },
-  {
-    "id": 43,
-    "x": 68.89,
-    "y": 71.54,
-    "nom": "Bordeaux",
-    "type": "ville"
-  },
-  {
-    "id": 44,
-    "x": 76.42,
-    "y": 71.54,
-    "nom": "Policier",
-    "type": "policier"
-  },
-  {
-    "id": 45,
-    "x": 76.42,
-    "y": 66.12,
-    "nom": "Canberra",
-    "type": "ville"
-  },
-  {
-    "id": 46,
-    "x": 76.42,
-    "y": 55.42,
-    "nom": "Sydney",
-    "type": "ville"
-  },
-  {
-    "id": 47,
-    "x": 76.42,
-    "y": 28.46,
-    "nom": "Négociation",
-    "type": "negociation"
-  },
-  {
-    "id": 48,
-    "x": 68.89,
-    "y": 28.46,
-    "nom": "Washington",
-    "type": "ville"
-  },
-  {
-    "id": 49,
-    "x": 61.32,
-    "y": 28.46,
-    "nom": "Chance",
-    "type": "chance"
-  },
-  {
-    "id": 50,
-    "x": 53.79,
-    "y": 28.46,
-    "nom": "New York",
-    "type": "ville"
-  },
-  {
-    "id": 51,
-    "x": 46.26,
-    "y": 28.46,
-    "nom": "Chicago",
-    "type": "ville"
-  },
-  {
-    "id": 52,
-    "x": 38.73,
-    "y": 28.46,
-    "nom": "Gare de Chicago",
-    "type": "gare"
-  },
-  {
-    "id": 53,
-    "x": 31.21,
-    "y": 28.46,
-    "nom": "Los Angeles",
-    "type": "ville"
-  },
-  {
-    "id": 54,
-    "x": 23.63,
-    "y": 28.46,
-    "nom": "Marché noir",
-    "type": "marche-noir"
-  },
-  {
-    "id": 55,
     "x": 21.73,
     "y": 44.65,
     "nom": "Berlin",
     "type": "ville"
   },
   {
-    "id": 56,
-    "x": 21.73,
-    "y": 55.42,
-    "nom": "Hambourg",
+    "id": 39,
+    "x": 23.63,
+    "y": 28.46,
+    "nom": "Marché noir",
+    "type": "marche-noir"
+  },
+  {
+    "id": 40,
+    "x": 31.21,
+    "y": 28.46,
+    "nom": "Los Angeles",
     "type": "ville"
+  },
+  {
+    "id": 41,
+    "x": 38.73,
+    "y": 28.46,
+    "nom": "Gare de Chicago",
+    "type": "gare"
+  },
+  {
+    "id": 42,
+    "x": 46.26,
+    "y": 28.46,
+    "nom": "Chicago",
+    "type": "ville"
+  },
+  {
+    "id": 43,
+    "x": 53.79,
+    "y": 28.46,
+    "nom": "New York",
+    "type": "ville"
+  },
+  {
+    "id": 44,
+    "x": 61.32,
+    "y": 28.46,
+    "nom": "Chance",
+    "type": "chance"
+  },
+  {
+    "id": 45,
+    "x": 68.89,
+    "y": 28.46,
+    "nom": "Washington",
+    "type": "ville"
+  },
+  {
+    "id": 46,
+    "x": 76.42,
+    "y": 28.46,
+    "nom": "Négociation",
+    "type": "negociation"
+  },
+  {
+    "id": 47,
+    "x": 76.42,
+    "y": 55.42,
+    "nom": "Sydney",
+    "type": "ville"
+  },
+  {
+    "id": 48,
+    "x": 76.42,
+    "y": 66.12,
+    "nom": "Canberra",
+    "type": "ville"
+  },
+  {
+    "id": 49,
+    "x": 76.42,
+    "y": 71.54,
+    "nom": "Policier",
+    "type": "policier"
+  },
+  {
+    "id": 50,
+    "x": 68.89,
+    "y": 71.54,
+    "nom": "Bordeaux",
+    "type": "ville"
+  },
+  {
+    "id": 51,
+    "x": 61.32,
+    "y": 71.54,
+    "nom": "Aéroport Centre",
+    "type": "aeroport"
+  },
+  {
+    "id": 52,
+    "x": 53.79,
+    "y": 71.54,
+    "nom": "Lille",
+    "type": "ville"
+  },
+  {
+    "id": 53,
+    "x": 46.26,
+    "y": 71.54,
+    "nom": "Lyon",
+    "type": "ville"
+  },
+  {
+    "id": 54,
+    "x": 38.73,
+    "y": 71.54,
+    "nom": "Chance",
+    "type": "chance"
+  },
+  {
+    "id": 55,
+    "x": 31.21,
+    "y": 71.54,
+    "nom": "Paris",
+    "type": "ville"
+  },
+  {
+    "id": 56,
+    "x": 23.63,
+    "y": 71.54,
+    "nom": "Flèche",
+    "type": "intermediaire"
   }
 ]

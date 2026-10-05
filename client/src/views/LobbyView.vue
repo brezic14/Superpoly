@@ -44,10 +44,10 @@ const copied = ref(false);
 const routeCode = computed(() => props.code || route.params.code || '');
 const displayCode = computed(() => room.code || routeCode.value);
 
-const canStart = computed(() => room.isHost && room.players.length >= 2);
+const canStart = computed(() => room.isHost && room.players.length >= 1);
 const startTitle = computed(() => {
   if (!room.isHost) return 'Seul l’hôte peut démarrer';
-  if (room.players.length < 2) return '2 joueurs minimum';
+  if (room.players.length < 1) return '1 joueur minimum';
   return 'Démarrer la partie';
 });
 

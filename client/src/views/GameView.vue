@@ -1,13 +1,9 @@
 <template>
   <div class="game-layout">
-    <!-- Colonne gauche : quitter + chat (placeholder MVP) -->
+    <!-- Colonne gauche : quitter + chat -->
     <aside class="game-left">
       <button class="quit-btn" @click="leave">Quitter</button>
-      <div class="chat-history">Historique du chat</div>
-      <div class="chat-input">
-        <input class="wire-input chat-box" placeholder="Taper ici" disabled />
-        <span class="chat-send">▷</span>
-      </div>
+      <ChatPanel />
     </aside>
 
     <!-- Centre : plateau -->
@@ -51,7 +47,9 @@ import { computed, onMounted, onUnmounted, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useRoomStore } from '../stores/room.js';
 import { useGameStore } from '../stores/game.js';
+import { useChatStore } from '../stores/chat.js';
 import GameBoard from '../components/GameBoard.vue';
+import ChatPanel from '../components/ChatPanel.vue';
 import DicePanel from '../components/DicePanel.vue';
 import PlayerSidebar from '../components/PlayerSidebar.vue';
 
@@ -60,6 +58,7 @@ const route = useRoute();
 const router = useRouter();
 const room = useRoomStore();
 const game = useGameStore();
+const chat = useChatStore();
 
 const START_MONEY = 200000;
 const routeCode = computed(() => props.code || route.params.code || '');
@@ -70,6 +69,7 @@ let gameTimer = null;
 async function leave() {
   if (gameTimer) clearInterval(gameTimer);
   game.reset();
+  chat.reset();
   await room.leaveRoom();
   router.push({ name: 'home' });
 }
@@ -84,8 +84,11 @@ onMounted(async () => {
     }
   }
   room.startPolling?.();
-  await game.pollOnce();
-  gameTimer = setInterval(() => game.pollOnce(), 2000);
+  await Promise.all([game.pollOnce(), chat.pollOnce()]);
+  gameTimer = setInterval(() => {
+    game.pollOnce();
+    chat.pollOnce();
+  }, 2000);
 });
 
 onUnmounted(() => {

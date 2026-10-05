@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { getStore } from '../lobby/restStore.js';
 import { ServiceError, createRoom, getState, joinRoom, kickPlayer, leaveRoom, startRoom } from '../lobby/service.js';
+import { postChat } from '../chat/service.js';
 import { getGameState, rollDice } from '../game/service.js';
 import { normalizeCode } from '../lobby/code.js';
 
@@ -73,9 +74,23 @@ export function roomsRouter() {
       if (!code) throw new ServiceError('INVALID_CODE');
       const room = await store().get(code);
       if (!room) throw new ServiceError('ROOM_NOT_FOUND', 404);
-      const { d1, d2, total, game } = rollDice(room, { token: req.body?.token });
+      const { d1, d2, total, game, chat } = rollDice(room, { token: req.body?.token });
       await store().save(room);
-      res.json({ ok: true, d1, d2, total, game });
+      res.json({ ok: true, d1, d2, total, game, chat });
+    } catch (e) {
+      sendServiceError(res, e);
+    }
+  });
+
+  router.post('/chat', async (req, res) => {
+    try {
+      const code = normalizeCode(req.body?.code);
+      if (!code) throw new ServiceError('INVALID_CODE');
+      const room = await store().get(code);
+      if (!room) throw new ServiceError('ROOM_NOT_FOUND', 404);
+      const { message, chat } = postChat(room, { token: req.body?.token, text: req.body?.text });
+      await store().save(room);
+      res.status(201).json({ ok: true, message, chat });
     } catch (e) {
       sendServiceError(res, e);
     }
