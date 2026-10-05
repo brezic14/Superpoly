@@ -49,6 +49,7 @@ export const useGameStore = defineStore('game', () => {
   const game = ref(null);
   const displayPositions = ref({});
   const animating = ref(false);
+  const animatingId = ref(null);
   const rolling = ref(false);
   const error = ref('');
   const seenVersion = ref(0);
@@ -73,18 +74,28 @@ export const useGameStore = defineStore('game', () => {
     displayPositions.value = pos;
   }
 
-  async function runAnimation(from, to, playerId) {
+  async function runAnimation(playerId, to) {
     animating.value = true;
+    animatingId.value = playerId;
     try {
-      for (const sq of pathSquares(from, to)) {
+      // Part de la position ACTUELLEMENT affichée (pas de lastRoll.from) : si des
+      // versions ont été ratées entre deux polls, on traverse quand même chaque
+      // case intermédiaire au lieu de téléporter le pion.
+      const start = displayPositions.value[playerId] ?? to;
+      if (start === to) return; // déjà sur place : rien à animer (évite un tour complet).
+      for (const sq of pathSquares(start, to)) {
         displayPositions.value = { ...displayPositions.value, [playerId]: sq };
         await sleep(STEP_MS);
       }
     } finally {
-      animating.value = false;
       // Joue les animations mises en file pendant celle-ci (tours rapides).
       const next = pendingAnims.value.shift();
-      if (next) await runAnimation(next.from, next.to, next.playerId);
+      if (next) {
+        await runAnimation(next.playerId, next.to);
+      } else {
+        animating.value = false;
+        animatingId.value = null;
+      }
     }
   }
 
@@ -99,17 +110,24 @@ export const useGameStore = defineStore('game', () => {
     }
     if (g.version === seenVersion.value) {
       // Pas de nouveau lancer : resync silencieuse (ex. refresh).
-      snapPositions(g);
+      // MAIS jamais pendant une animation : snapPositions téléporterait le pion
+      // sur sa case d'arrivée puis la boucle d'animation le ramènerait en arrière.
+      // Les autres pions ne peuvent pas bouger sans bump de version, donc on peut
+      // simplement ignorer ce poll tant que l'animation converge.
+      if (!animating.value && pendingAnims.value.length === 0) snapPositions(g);
       return;
     }
     seenVersion.value = g.version;
     const lr = g.lastRoll;
     if (animate && lr) {
-      const anim = { from: lr.from, to: lr.to, playerId: lr.playerId };
+      const anim = { to: lr.to, playerId: lr.playerId };
       if (animating.value) {
-        pendingAnims.value.push(anim);
+        // Évite les doublons : ne garde que la destination la plus récente par joueur.
+        const i = pendingAnims.value.findIndex((a) => a.playerId === anim.playerId);
+        if (i === -1) pendingAnims.value.push(anim);
+        else pendingAnims.value[i] = anim;
       } else {
-        void runAnimation(anim.from, anim.to, anim.playerId);
+        void runAnimation(anim.playerId, anim.to);
       }
       // Les autres pions (théoriquement inchangés) : synchro directe.
       for (const p of g.players) {
@@ -153,6 +171,7 @@ export const useGameStore = defineStore('game', () => {
     game.value = null;
     displayPositions.value = {};
     animating.value = false;
+    animatingId.value = null;
     rolling.value = false;
     error.value = '';
     seenVersion.value = 0;
@@ -161,7 +180,7 @@ export const useGameStore = defineStore('game', () => {
 
   return {
     game, players, currentPlayerId, currentPlayer, lastRoll, isMyTurn,
-    displayPositions, animating, rolling, error,
+    displayPositions, animating, animatingId, rolling, error,
     squareInfo, applyGame, pollOnce, roll, reset,
   };
 });
