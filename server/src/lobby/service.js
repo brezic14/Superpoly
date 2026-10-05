@@ -27,6 +27,8 @@ export const ERRORS = {
   TARGET_NOT_FOUND: 'Joueur introuvable.',
   NEED_2_PLAYERS: 'Il faut au moins 2 joueurs pour démarrer.',
   ALREADY_STARTED: 'La partie a déjà démarré.',
+  GAME_NOT_STARTED: 'La partie n’a pas encore démarré.',
+  NOT_YOUR_TURN: 'Ce n’est pas à toi de jouer.',
 };
 
 export class ServiceError extends Error {
@@ -43,7 +45,7 @@ export function publicRoom(room) {
     .slice()
     .sort((a, b) => a.joinedAt - b.joinedAt)
     .map((p) => ({ id: p.id, pseudo: p.pseudo, isHost: p.isHost, joinedAt: p.joinedAt }));
-  return {
+  const out = {
     code: room.code,
     maxPlayers: room.maxPlayers,
     status: room.status,
@@ -51,6 +53,21 @@ export function publicRoom(room) {
     players,
     hostId: players.find((p) => p.isHost)?.id ?? null,
   };
+  // Expose un résumé du jeu (positions, tour courant) sans token, pour le polling
+  // unique salon+jeu côté client. Le détail complet passe par publicGame().
+  if (room.game) {
+    const g = room.game;
+    out.game = {
+      status: g.status,
+      order: g.order.slice(),
+      currentIndex: g.currentIndex,
+      currentPlayerId: g.order[g.currentIndex] ?? null,
+      players: Object.values(g.players).map((p) => ({ ...p })),
+      lastRoll: g.lastRoll ? { ...g.lastRoll } : null,
+      version: g.version,
+    };
+  }
+  return out;
 }
 
 /** Payload minimal pour initialiser le futur Player métier (200 000€, case départ...). */
@@ -171,6 +188,9 @@ export async function startRoom(store, { code: rawCode, token }) {
   if (room.status !== 'WAITING') throw new ServiceError('ALREADY_STARTED', 409);
   if (room.players.length < 2) throw new ServiceError('NEED_2_PLAYERS', 409);
   room.status = 'STARTING';
+  // Initialise le moteur de jeu : ordre aléatoire fixe, tous case 0, couleurs.
+  const { initGame } = await import('../game/service.js');
+  initGame(room);
   room.version += 1;
   await store.save(room);
   // Futur pont vers Game métier : ordre / 200 000€ gérés à l'étape plateau.

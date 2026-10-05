@@ -201,7 +201,7 @@ export const useRoomStore = defineStore('room', () => {
   }
 
   return {
-    code, myPlayerId, myPseudo, players, maxPlayers, status, error, starting,
+    code, myPlayerId, myToken, myPseudo, players, maxPlayers, status, error, starting,
     isHost, createRoom, joinRoom, resumeRoom, leaveRoom, kick, startGame, pollOnce, startPolling, stopPolling, resetError,
   };
 });

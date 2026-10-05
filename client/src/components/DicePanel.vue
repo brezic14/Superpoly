@@ -1,0 +1,42 @@
+<template>
+  <div class="state-panel">
+    <span class="state-label">état</span>
+    <p class="state-title">{{ title }}</p>
+    <p class="state-desc">{{ description }}</p>
+    <p class="dice-result" v-if="lastRoll">{{ lastRoll.d1 }} + {{ lastRoll.d2 }} = {{ lastRoll.total }}</p>
+    <p class="state-desc info" v-if="lastRoll?.isDouble && !lastRoll?.sentToPrison">Double ! Rejouez.</p>
+    <p class="state-desc info" v-if="lastRoll?.sentToPrison">3 doubles… direction la prison !</p>
+    <button class="wire-btn dice-btn" :disabled="!canRoll || rolling || animating" @click="$emit('roll')">
+      {{ rolling ? 'Lancer…' : 'lancer les dés' }}
+    </button>
+    <p class="error" v-if="error">{{ error }}</p>
+  </div>
+</template>
+
+<script setup>
+import { computed } from 'vue';
+
+const props = defineProps({
+  isMyTurn: { type: Boolean, default: false },
+  animating: { type: Boolean, default: false },
+  rolling: { type: Boolean, default: false },
+  currentName: { type: String, default: '' },
+  lastRoll: { type: Object, default: null },
+  error: { type: String, default: '' },
+});
+defineEmits(['roll']);
+
+const canRoll = computed(() => props.isMyTurn && !props.animating && !props.rolling);
+
+const title = computed(() => {
+  if (props.animating) return 'Déplacement…';
+  if (props.isMyTurn) return 'A vous de jouer';
+  if (props.currentName) return `Tour de ${props.currentName}`;
+  return 'Partie en cours';
+});
+
+const description = computed(() => {
+  if (props.isMyTurn) return 'Lancez les dés et déplacez-vous d\u2019autant de cases que la somme du montant des deux dés.';
+  return 'Patientez : le joueur courant lance les dés, son pion avance case par case.';
+});
+</script>

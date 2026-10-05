@@ -1,6 +1,8 @@
 import { Router } from 'express';
 import { getStore } from '../lobby/restStore.js';
 import { ServiceError, createRoom, getState, joinRoom, kickPlayer, leaveRoom, startRoom } from '../lobby/service.js';
+import { getGameState, rollDice } from '../game/service.js';
+import { normalizeCode } from '../lobby/code.js';
 
 /** Routes REST du salon — même logique que les fonctions /api (Vercel). */
 export function roomsRouter() {
@@ -60,6 +62,32 @@ export function roomsRouter() {
   router.post('/start', async (req, res) => {
     try {
       res.json({ ok: true, ...(await startRoom(store(), { code: req.body?.code, token: req.body?.token })) });
+    } catch (e) {
+      sendServiceError(res, e);
+    }
+  });
+
+  router.post('/roll', async (req, res) => {
+    try {
+      const code = normalizeCode(req.body?.code);
+      if (!code) throw new ServiceError('INVALID_CODE');
+      const room = await store().get(code);
+      if (!room) throw new ServiceError('ROOM_NOT_FOUND', 404);
+      const { d1, d2, total, game } = rollDice(room, { token: req.body?.token });
+      await store().save(room);
+      res.json({ ok: true, d1, d2, total, game });
+    } catch (e) {
+      sendServiceError(res, e);
+    }
+  });
+
+  router.get('/game', async (req, res) => {
+    try {
+      const code = normalizeCode(req.query?.code);
+      if (!code) throw new ServiceError('INVALID_CODE');
+      const room = await store().get(code);
+      if (!room) throw new ServiceError('ROOM_NOT_FOUND', 404);
+      res.json({ ok: true, game: getGameState(room, { token: req.query?.token }) });
     } catch (e) {
       sendServiceError(res, e);
     }

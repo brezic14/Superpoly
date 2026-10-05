@@ -95,4 +95,14 @@ watch(
     if (!c && room.error.includes('expulsé')) router.push({ name: 'home' });
   }
 );
+
+// Démarrage (par l'hôte) -> tous les joueurs basculent vers l'interface de jeu.
+watch(
+  () => room.status,
+  (s) => {
+    if ((s === 'STARTING' || s === 'PLAYING') && room.code) {
+      router.push({ name: 'game', params: { code: room.code } });
+    }
+  }
+);
 </script>
