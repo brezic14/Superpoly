@@ -33,6 +33,8 @@ export const useRoomStore = defineStore('room', () => {
   const status = ref('WAITING');
   const error = ref('');
   const starting = ref(null);
+  const seenCode = ref('');
+  const seenVersion = ref(0);
   let pollTimer = null;
 
   const isHost = computed(() => {
@@ -45,6 +47,17 @@ export const useRoomStore = defineStore('room', () => {
   }
 
   function applyRoom(payload) {
+    if (!payload) return;
+    // Réponse destinée à un autre salon (poll en vol pendant un changement de
+    // salon) : l'ignorer pour ne pas corrompre le salon courant.
+    if (payload.code && code.value && payload.code !== code.value) return;
+    // Nouveau salon : les versions repartent, on réarme le garde anti-périmé.
+    if (payload.code && payload.code !== seenCode.value) {
+      seenCode.value = payload.code;
+      seenVersion.value = 0;
+    }
+    // Réponse périmée (émise avant une action déjà appliquée) : l'ignorer.
+    if (payload.version != null && payload.version < seenVersion.value) return;
     code.value = payload.code ?? code.value;
     players.value = payload.players ?? players.value;
     maxPlayers.value = payload.maxPlayers ?? maxPlayers.value;
@@ -56,6 +69,7 @@ export const useRoomStore = defineStore('room', () => {
     if (status.value === 'STARTING' && !starting.value) {
       starting.value = { code: code.value, players: players.value };
     }
+    if (payload.version != null) seenVersion.value = payload.version;
   }
 
   function rememberToken() {
@@ -77,8 +91,12 @@ export const useRoomStore = defineStore('room', () => {
 
   async function pollOnce() {
     if (!code.value || !myToken.value) return;
+    const pollCode = code.value;
+    const pollToken = myToken.value;
     try {
-      const state = await api(`state?code=${encodeURIComponent(code.value)}&token=${encodeURIComponent(myToken.value)}`);
+      const state = await api(`state?code=${encodeURIComponent(pollCode)}&token=${encodeURIComponent(pollToken)}`);
+      // Salon quitté/rejoint entre l'envoi et la réponse : jeter la réponse.
+      if (code.value !== pollCode || myToken.value !== pollToken) return;
       applyRoom(state);
       resetErrorIfSync(state);
     } catch (e) {
@@ -91,6 +109,8 @@ export const useRoomStore = defineStore('room', () => {
         players.value = [];
         myToken.value = '';
         myPlayerId.value = '';
+        seenCode.value = '';
+        seenVersion.value = 0;
         error.value = wasKicked ? 'Tu as été expulsé du salon.' : e.message;
       }
       // Sinon (réseau...) : on garde l'état, le prochain poll réessaiera.
@@ -169,6 +189,8 @@ export const useRoomStore = defineStore('room', () => {
     myToken.value = '';
     myPlayerId.value = '';
     starting.value = null;
+    seenCode.value = '';
+    seenVersion.value = 0;
     if (c && t) {
       await api('leave', { method: 'POST', body: { code: c, token: t } }).catch(() => {});
     }

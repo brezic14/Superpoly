@@ -64,6 +64,7 @@ export function publicRoom(room) {
     const g = room.game;
     out.game = {
       status: g.status,
+      gid: g.gid ?? 0,
       order: g.order.slice(),
       currentIndex: g.currentIndex,
       currentPlayerId: g.order[g.currentIndex] ?? null,

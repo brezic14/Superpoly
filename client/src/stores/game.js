@@ -52,6 +52,7 @@ export const useGameStore = defineStore('game', () => {
   const animatingId = ref(null);
   const rolling = ref(false);
   const error = ref('');
+  const seenGid = ref(0);
   const seenVersion = ref(0);
   const pendingAnims = ref([]);
 
@@ -84,6 +85,9 @@ export const useGameStore = defineStore('game', () => {
       const start = displayPositions.value[playerId] ?? to;
       if (start === to) return; // déjà sur place : rien à animer (évite un tour complet).
       for (const sq of pathSquares(start, to)) {
+        // Nouvelle partie ou reset entre-temps : on abandonne, sinon l'ancienne
+        // animation écrirait des cases périmées dans la nouvelle partie.
+        if (animatingId.value !== playerId) return;
         displayPositions.value = { ...displayPositions.value, [playerId]: sq };
         await sleep(STEP_MS);
       }
@@ -101,26 +105,39 @@ export const useGameStore = defineStore('game', () => {
 
   function applyGame(g, { animate = true } = {}) {
     if (!g) return;
-    const firstLoad = !game.value;
-    game.value = g;
-    if (firstLoad || seenVersion.value === 0) {
+    const gid = g.gid ?? 0;
+    if (gid !== seenGid.value) {
+      // Nouvelle partie (ou premier chargement) : les versions repartent à 1,
+      // resync complète au lieu d'animer depuis l'ancienne partie.
+      seenGid.value = gid;
       seenVersion.value = g.version;
+      pendingAnims.value = [];
+      animating.value = false;
+      animatingId.value = null;
+      game.value = g;
       snapPositions(g);
       return;
     }
-    if (g.version <= seenVersion.value) {
+    if (g.version < seenVersion.value) {
+      // Réponse périmée (poll émis avant un lancer, arrivé après sa réponse) :
+      // l'ignorer ENTIÈREMENT, sinon game.value (dés affichés) et les positions
+      // seraient réécrits avec d'anciennes données.
+      return;
+    }
+    if (g.version === seenVersion.value) {
       // Pas de nouveau lancer : resync silencieuse (ex. refresh).
-      // Le `<=` (et non `===`) écarte aussi les réponses périmées : un poll émis
-      // avant un lancer peut arriver APRÈS sa réponse et rejouer sinon l'ancien
-      // lancer (pion renvoyé sur une case dépassée).
       // MAIS jamais pendant une animation : snapPositions téléporterait le pion
       // sur sa case d'arrivée puis la boucle d'animation le ramènerait en arrière.
       // Les autres pions ne peuvent pas bouger sans bump de version, donc on peut
       // simplement ignorer ce poll tant que l'animation converge.
-      if (!animating.value && pendingAnims.value.length === 0) snapPositions(g);
+      if (!animating.value && pendingAnims.value.length === 0) {
+        game.value = g;
+        snapPositions(g);
+      }
       return;
     }
     seenVersion.value = g.version;
+    game.value = g;
     const lr = g.lastRoll;
     if (animate && lr) {
       const anim = { to: lr.to, playerId: lr.playerId };
@@ -144,8 +161,13 @@ export const useGameStore = defineStore('game', () => {
   async function pollOnce() {
     const r = room();
     if (!r.code || !r.myToken) return;
+    const pollCode = r.code;
+    const pollToken = r.myToken;
     try {
-      const state = await api(`state?code=${encodeURIComponent(r.code)}&token=${encodeURIComponent(r.myToken)}`);
+      const state = await api(`state?code=${encodeURIComponent(pollCode)}&token=${encodeURIComponent(pollToken)}`);
+      // Salon quitté/rejoint entre l'envoi et la réponse : réponse d'un ancien
+      // salon, à jeter pour ne pas corrompre la partie en cours.
+      if (r.code !== pollCode || r.myToken !== pollToken) return;
       if (state.game) applyGame({ ...state.game, myPlayerId: state.myPlayerId });
       error.value = '';
     } catch (e) {
@@ -177,6 +199,7 @@ export const useGameStore = defineStore('game', () => {
     animatingId.value = null;
     rolling.value = false;
     error.value = '';
+    seenGid.value = 0;
     seenVersion.value = 0;
     pendingAnims.value = [];
   }

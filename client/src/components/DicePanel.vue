@@ -4,6 +4,7 @@
     <p class="state-title">{{ title }}</p>
     <p class="state-desc">{{ description }}</p>
     <p class="dice-result" v-if="lastRoll">{{ lastRoll.d1 }} + {{ lastRoll.d2 }} = {{ lastRoll.total }}</p>
+    <p class="state-desc" v-if="lastRoll">De {{ caseName(lastRoll.from) }} vers {{ caseName(lastRoll.to) }}</p>
     <p class="state-desc info" v-if="lastRoll?.isDouble && !lastRoll?.sentToPrison">Double ! Rejouez.</p>
     <p class="state-desc info" v-if="lastRoll?.sentToPrison">3 doubles… direction la prison !</p>
     <button class="wire-btn dice-btn" :disabled="!canRoll || rolling || animating" @click="$emit('roll')">
@@ -15,6 +16,7 @@
 
 <script setup>
 import { computed } from 'vue';
+import board from '../data/board.json';
 
 const props = defineProps({
   isMyTurn: { type: Boolean, default: false },
@@ -27,6 +29,12 @@ const props = defineProps({
 defineEmits(['roll']);
 
 const canRoll = computed(() => props.isMyTurn && !props.animating && !props.rolling);
+
+// Nom de case pour vérifier visuellement chaque déplacement (ex. "De Lille vers Florence").
+function caseName(id) {
+  const cell = board.find((s) => s.id === id);
+  return cell ? `${cell.nom} (${cell.id})` : `#${id}`;
+}
 
 const title = computed(() => {
   if (props.animating) return 'Déplacement…';

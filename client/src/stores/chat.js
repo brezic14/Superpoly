@@ -32,18 +32,39 @@ export const useChatStore = defineStore('chat', () => {
   const version = ref(0);
   const sending = ref(false);
   const error = ref('');
+  const seenCode = ref('');
+  const seenVersion = ref(0);
 
   function applyChat(chat) {
     if (!chat) return;
-    if (typeof chat.version === 'number') version.value = chat.version;
+    if (typeof chat.version === 'number') {
+      // Ignore les réponses périmées (poll émis avant un message, arrivé après).
+      if (chat.version < seenVersion.value) return;
+      seenVersion.value = chat.version;
+      version.value = chat.version;
+    }
     if (Array.isArray(chat.messages)) messages.value = chat.messages;
+  }
+
+  function ensureRoom(code) {
+    // Nouveau salon : repartir de zéro (les versions recommencent à 1).
+    if (code !== seenCode.value) {
+      seenCode.value = code;
+      seenVersion.value = 0;
+      version.value = 0;
+      messages.value = [];
+    }
   }
 
   async function pollOnce() {
     const r = useRoomStore();
     if (!r.code || !r.myToken) return;
+    const pollCode = r.code;
+    const pollToken = r.myToken;
     try {
-      const state = await api(`state?code=${encodeURIComponent(r.code)}&token=${encodeURIComponent(r.myToken)}`);
+      const state = await api(`state?code=${encodeURIComponent(pollCode)}&token=${encodeURIComponent(pollToken)}`);
+      if (r.code !== pollCode || r.myToken !== pollToken) return;
+      ensureRoom(pollCode);
       if (state.chat) applyChat(state.chat);
       if (!error.value.startsWith('Doucement')) error.value = '';
     } catch (e) {
@@ -55,6 +76,7 @@ export const useChatStore = defineStore('chat', () => {
     const r = useRoomStore();
     const clean = String(text ?? '').trim();
     if (!clean || sending.value) return;
+    ensureRoom(r.code);
     sending.value = true;
     error.value = '';
     try {
@@ -75,6 +97,8 @@ export const useChatStore = defineStore('chat', () => {
     version.value = 0;
     sending.value = false;
     error.value = '';
+    seenCode.value = '';
+    seenVersion.value = 0;
   }
 
   return { messages, version, sending, error, applyChat, pollOnce, send, reset };

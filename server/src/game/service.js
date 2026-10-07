@@ -49,8 +49,13 @@ export function initGame(room, randomFn = Math.random) {
       square: 0,
     };
   });
+  // gid : identifiant de partie, incrémenté à chaque démarrage dans ce salon.
+  // Permet au client de distinguer une nouvelle partie (versions repartent à 1)
+  // d'une réponse réseau périmée (à ignorer).
+  const gid = (room.gidCounter = (room.gidCounter ?? 0) + 1);
   room.game = {
     status: 'PLAYING',
+    gid,
     order,
     currentIndex: 0,
     players,
@@ -71,6 +76,7 @@ export function publicGame(room, myPlayerId = null) {
   const currentPlayerId = g.order[g.currentIndex] ?? null;
   return {
     status: g.status,
+    gid: g.gid ?? 0,
     order: g.order.slice(),
     currentIndex: g.currentIndex,
     currentPlayerId,

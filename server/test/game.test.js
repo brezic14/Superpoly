@@ -2,7 +2,7 @@ import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { MemoryRoomStore } from '../src/lobby/restStore.js';
 import { createRoom, joinRoom, startRoom } from '../src/lobby/service.js';
-import { BOARD_SIZE, PRISON_SQUARE, getGameState, initGame, rollDice } from '../src/game/service.js';
+import { BOARD_SIZE, PRISON_SQUARE, getGameState, initGame, publicGame, rollDice } from '../src/game/service.js';
 
 async function twoPlayerRoom() {
   const store = new MemoryRoomStore();
@@ -87,6 +87,22 @@ describe('moteur jeu (déplacement seul)', () => {
       assert.equal(r.game.lastRoll.from, from);
       assert.equal(r.game.lastRoll.to, expected);
     }
+  });
+
+  it('gid : chaque démarrage incrémente, exposé en vue publique', () => {
+    const room = {
+      version: 1,
+      players: [
+        { id: 'a', pseudo: 'A', token: 't-a' },
+        { id: 'b', pseudo: 'B', token: 't-b' },
+      ],
+    };
+    initGame(room, () => 0.999);
+    assert.equal(room.game.gid, 1);
+    assert.equal(publicGame(room).gid, 1);
+    initGame(room, () => 0.999);
+    assert.equal(room.game.gid, 2);
+    assert.equal(publicGame(room).gid, 2);
   });
 
   it('3 doubles -> prison + tour suivant', () => {
