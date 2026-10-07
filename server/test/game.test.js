@@ -66,6 +66,29 @@ describe('moteur jeu (déplacement seul)', () => {
     assert.equal(r.game.players.find((p) => p.id === cur).square, 3);
   });
 
+  it('passage case départ : pas de -1 (55 + 4 = 2, 56 + 1 = 0)', () => {
+    for (const [from, d1, d2, expected] of [[55, 1, 3, 2], [56, 1, 1, 1], [56, 1, 2, 2], [35, 1, 1, 37]]) {
+      const room = {
+        version: 1,
+        players: [
+          { id: 'a', pseudo: 'A', token: 't-a' },
+          { id: 'b', pseudo: 'B', token: 't-b' },
+        ],
+      };
+      initGame(room, () => 0.999);
+      const cur = room.game.order[0];
+      const tok = cur === 'a' ? 't-a' : 't-b';
+      room.game.players[cur].square = from;
+      const seq = [(d1 - 1 + 0.5) / 6, (d2 - 1 + 0.5) / 6];
+      let i = 0;
+      const r = rollDice(room, { token: tok, randomFn: () => seq[i++ % seq.length] });
+      assert.equal(r.total, d1 + d2);
+      assert.equal(r.game.players.find((p) => p.id === cur).square, expected);
+      assert.equal(r.game.lastRoll.from, from);
+      assert.equal(r.game.lastRoll.to, expected);
+    }
+  });
+
   it('3 doubles -> prison + tour suivant', () => {
     const room = {
       version: 1,

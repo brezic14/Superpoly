@@ -108,8 +108,11 @@ export const useGameStore = defineStore('game', () => {
       snapPositions(g);
       return;
     }
-    if (g.version === seenVersion.value) {
+    if (g.version <= seenVersion.value) {
       // Pas de nouveau lancer : resync silencieuse (ex. refresh).
+      // Le `<=` (et non `===`) écarte aussi les réponses périmées : un poll émis
+      // avant un lancer peut arriver APRÈS sa réponse et rejouer sinon l'ancien
+      // lancer (pion renvoyé sur une case dépassée).
       // MAIS jamais pendant une animation : snapPositions téléporterait le pion
       // sur sa case d'arrivée puis la boucle d'animation le ramènerait en arrière.
       // Les autres pions ne peuvent pas bouger sans bump de version, donc on peut
