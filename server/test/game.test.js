@@ -47,7 +47,7 @@ describe('moteur jeu (déplacement seul)', () => {
     await store.save(room);
   });
 
-  it('déplacement modulo 57', () => {
+  it('déplacement modulo 56', () => {
     const room = {
       version: 1,
       players: [
@@ -60,14 +60,14 @@ describe('moteur jeu (déplacement seul)', () => {
     const cur = room.game.order[0];
     const tok = cur === 'a' ? 't-a' : 't-b';
     room.game.players[cur].square = 54;
-    // randomFn donnant 3 : 1+floor(r*6)=3 -> r dans [0.333,0.5[. Double -> rejouer mais square=(54+6)%57=3.
+    // randomFn donnant 3 : 1+floor(r*6)=3 -> r dans [0.333,0.5[. Double -> rejouer mais square=(54+6)%56=4.
     const r = rollDice(room, { token: tok, randomFn: () => 0.4 });
     assert.equal(r.total, 6);
-    assert.equal(r.game.players.find((p) => p.id === cur).square, 3);
+    assert.equal(r.game.players.find((p) => p.id === cur).square, 4);
   });
 
-  it('passage case départ : pas de -1 (55 + 4 = 2, 56 + 1 = 0)', () => {
-    for (const [from, d1, d2, expected] of [[55, 1, 3, 2], [56, 1, 1, 1], [56, 1, 2, 2], [35, 1, 1, 37]]) {
+  it('passage case départ : 55 + 4 = 3, 54 + 2 = 0 (pile Départ)', () => {
+    for (const [from, d1, d2, expected] of [[55, 1, 3, 3], [54, 1, 1, 0], [35, 1, 1, 37], [0, 6, 6, 12]]) {
       const room = {
         version: 1,
         players: [
@@ -131,6 +131,6 @@ describe('moteur jeu (déplacement seul)', () => {
     const state = getGameState(room, { token: host.token });
     assert.equal(typeof state.isMyTurn, 'boolean');
     assert.equal(state.players.length, 2);
-    assert.ok(BOARD_SIZE === 57);
+    assert.ok(BOARD_SIZE === 56);
   });
 });

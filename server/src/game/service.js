@@ -16,7 +16,7 @@ import { publicChat, pushSystemMessage } from '../chat/utils.js';
  * }
  */
 
-export const BOARD_SIZE = 57;
+export const BOARD_SIZE = 56;
 export const START_MONEY = 200000;
 /** Case "simple visite / prison" (coin haut-gauche du plateau visuel). */
 export const PRISON_SQUARE = 7;

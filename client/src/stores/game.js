@@ -5,7 +5,7 @@ import { useChatStore } from './chat.js';
 import board from '../data/board.json';
 
 const API_BASE = (import.meta.env.VITE_SERVER_URL ?? '').replace(/\/$/, '');
-export const BOARD_SIZE = 57;
+export const BOARD_SIZE = 56;
 export const STEP_MS = 250;
 
 async function api(path, { method = 'GET', body } = {}) {
@@ -34,7 +34,7 @@ async function api(path, { method = 'GET', body } = {}) {
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 export function pathSquares(from, to) {
-  // Chemin visuel case-par-case (cf board.md) : avance de 1 en 1 avec wrap 56 -> 0.
+  // Chemin visuel case-par-case (cf board.md) : avance de 1 en 1 avec wrap 55 -> 0.
   const out = [];
   let cur = from;
   for (let i = 0; i < BOARD_SIZE; i += 1) {

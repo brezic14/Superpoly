@@ -253,7 +253,7 @@
   },
   {
     "id": 36,
-    "x": 17.95,
+    "x": 20.79,
     "y": 71.54,
     "nom": "Intermédiaire",
     "type": "intermediaire"
@@ -390,12 +390,5 @@
     "y": 71.54,
     "nom": "Paris",
     "type": "ville"
-  },
-  {
-    "id": 56,
-    "x": 23.63,
-    "y": 71.54,
-    "nom": "Flèche",
-    "type": "intermediaire"
   }
 ]
