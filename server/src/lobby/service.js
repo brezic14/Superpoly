@@ -1,5 +1,6 @@
 import { MAX_PLAYERS, NAME_MAX, NAME_MIN } from '../config.js';
 import { ensureChat, publicChat, pushSystemMessage } from '../chat/utils.js';
+import { CITIES, cityDetail } from '../game/cities.js';
 import {
   generateCode,
   generatePlayerId,
@@ -30,6 +31,12 @@ export const ERRORS = {
   ALREADY_STARTED: 'La partie a déjà démarré.',
   GAME_NOT_STARTED: 'La partie n’a pas encore démarré.',
   NOT_YOUR_TURN: 'Ce n’est pas à toi de jouer.',
+  PENDING_BUY: 'Choisis passer ou acheter avant de relancer les dés.',
+  NO_PENDING: 'Aucun choix en attente.',
+  ALREADY_OWNED: 'Cette ville est déjà achetée.',
+  NOT_ENOUGH_MONEY: 'Pas assez d’argent pour acheter cette ville.',
+  NOT_A_CITY: 'Cette case n’est pas une ville achetable.',
+  INVALID_CHOICE: 'Choix invalide (passer ou acheter).',
   CHAT_EMPTY: 'Message vide.',
   CHAT_TOO_LONG: 'Message trop long (200 caractères max).',
   CHAT_RATE_LIMIT: 'Doucement, un message à la fois.',
@@ -62,6 +69,22 @@ export function publicRoom(room) {
   // unique salon+jeu côté client. Le détail complet passe par publicGame().
   if (room.game) {
     const g = room.game;
+    // Résumé jeu pour le polling (même forme utile que publicGame()).
+    const ownership = Object.fromEntries(
+      Object.entries(g.ownership ?? {}).map(([sq, o]) => [sq, { ...o }])
+    );
+    const properties = {};
+    for (const sq of Object.keys(CITIES)) {
+      const detail = cityDetail(Number(sq), g.ownership ?? {});
+      properties[sq] = {
+        ownerId: detail.ownerId,
+        price: detail.price,
+        rent: detail.ownerId ? detail.currentRent : detail.baseRent,
+      };
+    }
+    const pending = g.pending
+      ? { ...g.pending, detail: cityDetail(g.pending.square, g.ownership ?? {}) }
+      : null;
     out.game = {
       status: g.status,
       gid: g.gid ?? 0,
@@ -69,6 +92,9 @@ export function publicRoom(room) {
       currentIndex: g.currentIndex,
       currentPlayerId: g.order[g.currentIndex] ?? null,
       players: Object.values(g.players).map((p) => ({ ...p })),
+      ownership,
+      properties,
+      pending,
       lastRoll: g.lastRoll ? { ...g.lastRoll } : null,
       version: g.version,
     };
@@ -163,6 +189,10 @@ export async function leaveRoom(store, { code: rawCode, token }) {
     await store.remove(code);
     return { left: true, roomGone: true, code };
   }
+  if (room.game) {
+    const { removeFromGame } = await import('../game/service.js');
+    removeFromGame(room, leaving.id);
+  }
   pushSystemMessage(room, `${leaving.pseudo} a quitté le salon.`);
   await store.save(room);
   return { left: true, roomGone: false, room: publicRoom(room) };
@@ -182,6 +212,10 @@ export async function kickPlayer(store, { code: rawCode, token, targetId }) {
   if (target.isHost) throw new ServiceError('CANNOT_KICK_HOST', 403);
   room.players = room.players.filter((p) => p.id !== targetId);
   room.version += 1;
+  if (room.game) {
+    const { removeFromGame } = await import('../game/service.js');
+    removeFromGame(room, targetId);
+  }
   pushSystemMessage(room, `${target.pseudo} a été expulsé par ${me.pseudo}.`);
   await store.save(room);
   return { room: publicRoom(room), kickedId: targetId };

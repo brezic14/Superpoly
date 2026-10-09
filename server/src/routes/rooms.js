@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { getStore } from '../lobby/restStore.js';
 import { ServiceError, createRoom, getState, joinRoom, kickPlayer, leaveRoom, startRoom } from '../lobby/service.js';
 import { postChat } from '../chat/service.js';
-import { getGameState, rollDice } from '../game/service.js';
+import { getGameState, resolveBuy, rollDice } from '../game/service.js';
 import { normalizeCode } from '../lobby/code.js';
 
 /** Routes REST du salon — même logique que les fonctions /api (Vercel). */
@@ -95,6 +95,26 @@ export function roomsRouter() {
       sendServiceError(res, e);
     }
   });
+
+  function buyChoiceHandler(choice) {
+    return async (req, res) => {
+      try {
+        const code = normalizeCode(req.body?.code);
+        if (!code) throw new ServiceError('INVALID_CODE');
+        const room = await store().get(code);
+        if (!room) throw new ServiceError('ROOM_NOT_FOUND', 404);
+        const { game, chat } = resolveBuy(room, { token: req.body?.token, choice });
+        await store().save(room);
+        res.json({ ok: true, game, chat });
+      } catch (e) {
+        sendServiceError(res, e);
+      }
+    };
+  }
+
+  router.post('/buy', buyChoiceHandler('buy'));
+
+  router.post('/pass', buyChoiceHandler('pass'));
 
   router.get('/game', async (req, res) => {
     try {

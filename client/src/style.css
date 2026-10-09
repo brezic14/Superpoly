@@ -163,6 +163,35 @@ main { flex: 1; display: flex; justify-content: center; }
   transition: left 0.22s linear, top 0.22s linear;
   pointer-events: none;
 }
+/* Étiquettes prix (ville libre, noir) / loyer (couleur du propriétaire). */
+.price-tag {
+  position: absolute;
+  font-size: 10px;
+  font-weight: 800;
+  white-space: nowrap;
+  pointer-events: none;
+  text-shadow: 0 0 3px #fff, 0 0 3px #fff, 1px 0 0 #fff, -1px 0 0 #fff;
+}
+/* Fiche ville libre (cf maquette ville_libre). */
+.city-card {
+  border: 2px solid var(--border);
+  padding: 10px 12px;
+  width: 100%;
+  font-size: 12px;
+  background: #fff;
+}
+.city-kind { font-size: 11px; color: #888; margin: 0; }
+.city-title { font-weight: 900; font-size: 14px; margin: 2px 0 6px; }
+.city-rows { border-top: 2px solid #222; padding-top: 6px; }
+.city-rows p { margin: 3px 0; }
+.city-rent-up { color: #0a8a0a; }
+.city-soft { color: #0a8a0a; font-size: 11px; }
+.city-sep { margin-left: 10px; }
+.city-actions { display: flex; gap: 10px; margin-top: 8px; }
+.city-pass, .city-buy { min-width: 0; flex: 1; font-size: 14px; padding: 8px; }
+.city-pass { background: #8f9bff; }
+.city-buy { background: #37d67a; }
+.city-pass:disabled, .city-buy:disabled { opacity: 0.5; cursor: not-allowed; }
 .game-right {
   border-left: 3px solid var(--border);
   display: flex;

@@ -8,7 +8,7 @@
     >
       <span class="pawn-dot" :style="{ background: p.color }" />
       <span class="side-name">{{ p.pseudo }}<span v-if="p.id === myId"> (vous)</span></span>
-      <span class="side-money">{{ START_MONEY.toLocaleString('fr-FR') }}€</span>
+      <span class="side-money">{{ (p.money ?? START_MONEY).toLocaleString('fr-FR') }}€</span>
     </div>
   </div>
 </template>

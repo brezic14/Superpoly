@@ -14,6 +14,7 @@
         :players="game.players"
         :positions="game.displayPositions"
         :last-roll="game.lastRoll"
+        :properties="game.properties"
       />
     </section>
 
@@ -30,13 +31,23 @@
         :rolling="game.rolling"
         :current-name="game.currentPlayer?.pseudo ?? ''"
         :last-roll="game.lastRoll"
+        :pending="game.pending"
         :error="game.error || room.error"
         @roll="game.roll()"
+      />
+      <CityCard
+        v-if="game.pending"
+        :pending="game.pending"
+        :my-id="room.myPlayerId"
+        :my-money="me?.money ?? START_MONEY"
+        :resolving="game.resolving"
+        @buy="game.buy()"
+        @pass="game.pass()"
       />
       <div class="me-card" v-if="me">
         <p>{{ me.pseudo }} (vous)</p>
         <span class="pawn-big" :style="{ background: me.color }" />
-        <p>{{ START_MONEY.toLocaleString('fr-FR') }}€</p>
+        <p>{{ (me.money ?? START_MONEY).toLocaleString('fr-FR') }}€</p>
       </div>
     </aside>
   </div>
@@ -50,6 +61,7 @@ import { useGameStore } from '../stores/game.js';
 import { useChatStore } from '../stores/chat.js';
 import GameBoard from '../components/GameBoard.vue';
 import ChatPanel from '../components/ChatPanel.vue';
+import CityCard from '../components/CityCard.vue';
 import DicePanel from '../components/DicePanel.vue';
 import PlayerSidebar from '../components/PlayerSidebar.vue';
 

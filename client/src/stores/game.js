@@ -61,6 +61,8 @@ export const useGameStore = defineStore('game', () => {
   const players = computed(() => game.value?.players ?? []);
   const currentPlayerId = computed(() => game.value?.currentPlayerId ?? null);
   const lastRoll = computed(() => game.value?.lastRoll ?? null);
+  const pending = computed(() => game.value?.pending ?? null);
+  const properties = computed(() => game.value?.properties ?? {});
   const myId = computed(() => room().myPlayerId);
   const isMyTurn = computed(() => !!myId.value && myId.value === currentPlayerId.value && !animating.value);
   const currentPlayer = computed(() => players.value.find((p) => p.id === currentPlayerId.value) ?? null);
@@ -179,7 +181,7 @@ export const useGameStore = defineStore('game', () => {
   async function roll() {
     const r = room();
     error.value = '';
-    if (rolling.value || animating.value) return;
+    if (rolling.value || animating.value || pending.value) return;
     rolling.value = true;
     try {
       const json = await api('roll', { method: 'POST', body: { code: r.code, token: r.myToken } });
@@ -191,6 +193,27 @@ export const useGameStore = defineStore('game', () => {
       rolling.value = false;
     }
   }
+
+  const resolving = ref(false);
+
+  async function resolveChoice(path) {
+    const r = room();
+    error.value = '';
+    if (resolving.value) return;
+    resolving.value = true;
+    try {
+      const json = await api(path, { method: 'POST', body: { code: r.code, token: r.myToken } });
+      applyGame(json.game);
+      if (json.chat) useChatStore().applyChat(json.chat);
+    } catch (e) {
+      error.value = e.message ?? 'Choix impossible.';
+    } finally {
+      resolving.value = false;
+    }
+  }
+
+  const buy = () => resolveChoice('buy');
+  const pass = () => resolveChoice('pass');
 
   function reset() {
     game.value = null;
@@ -206,7 +229,8 @@ export const useGameStore = defineStore('game', () => {
 
   return {
     game, players, currentPlayerId, currentPlayer, lastRoll, isMyTurn,
+    pending, properties, resolving,
     displayPositions, animating, animatingId, rolling, error,
-    squareInfo, applyGame, pollOnce, roll, reset,
+    squareInfo, applyGame, pollOnce, roll, buy, pass, reset,
   };
 });
