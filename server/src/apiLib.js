@@ -1,9 +1,10 @@
-import { ServiceError } from '../server/src/lobby/service.js';
-import { getStore } from '../server/src/lobby/restStore.js';
+import { ServiceError } from './lobby/service.js';
+import { getStore } from './lobby/restStore.js';
 
 /**
  * Socle des fonctions serverless /api (Vercel) — zéro dépendance externe.
  * Même logique métier que l'Express local (server/src/routes/rooms.js).
+ * Placé hors de api/ pour ne pas compter comme fonction serverless (limite Hobby).
  */
 export function withCors(handler) {
   return async (req, res) => {

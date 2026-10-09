@@ -1,7 +1,7 @@
 import { normalizeCode } from '../../server/src/lobby/code.js';
 import { ServiceError } from '../../server/src/lobby/service.js';
 import { resolveBuy } from '../../server/src/game/service.js';
-import { readBody, withCors } from '../_lib.js';
+import { readBody, withCors } from '../../server/src/apiLib.js';
 
 function handlerFor(choice) {
   return withCors(async (req, res, store) => {
