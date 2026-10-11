@@ -1,6 +1,33 @@
 <template>
   <div class="board-wrap">
     <img class="board-img" :src="plateauUrl" alt="Plateau Superpoly" draggable="false" />
+    <!-- Debug ?debug=1 : id de chaque case (vérif attribution des étiquettes). -->
+    <template v-if="debug">
+      <div
+        v-for="cell in board"
+        :key="'dbg-' + cell.id"
+        class="debug-id"
+        :style="{ left: cell.x + '%', top: cell.y + '%' }"
+      >
+        {{ cell.id }}
+      </div>
+    </template>
+    <!-- Étiquettes prix/loyer au slot <pos_coût> : prix d'achat en noir si ville
+         libre, sinon loyer actuel de la couleur du propriétaire. -->
+    <div
+      v-for="tag in priceTags"
+      :key="'tag-' + tag.id"
+      class="price-tag"
+      :data-square="tag.id"
+      :style="{
+        left: tag.x + '%',
+        top: tag.y + '%',
+        color: tag.color,
+        transform: `translate(-50%, -50%) rotate(${tag.angle}deg)`,
+      }"
+    >
+      {{ tag.label }}
+    </div>
     <!-- Étiquettes prix/loyer : prix d'achat en noir si ville libre, sinon loyer
          actuel de la couleur du propriétaire. Rotation selon le sens de marche. -->
     <div
@@ -38,6 +65,9 @@
 import { computed } from 'vue';
 import plateauUrl from '../assets/plateau.png';
 import board from '../data/board.json';
+import { slotFor } from './cellSlots.js';
+
+const debug = new URLSearchParams(window.location.search).has('debug');
 
 const props = defineProps({
   players: { type: Array, default: () => [] },
@@ -68,23 +98,14 @@ const lastSquare = computed(() => {
   return props.positions[props.lastRoll.playerId] ?? props.lastRoll.to;
 });
 
-// Angle du texte prix/loyer : sens de marche case -> suivante, quantifié.
-function tagAngle(cell) {
-  const next = board.find((s) => s.id === (cell.id + 1) % board.length);
-  if (!next) return 0;
-  const dx = next.x - cell.x;
-  const dy = next.y - cell.y;
-  if (Math.abs(dx) >= Math.abs(dy)) return dx >= 0 ? 0 : 180;
-  return dy >= 0 ? 90 : -90;
-}
-
 const colorByPlayer = computed(() => {
   const map = {};
   for (const p of props.players) map[p.id] = p.color;
   return map;
 });
 
-// Une étiquette par case ville : prix (noir, libre) ou loyer (couleur du proprio).
+// Une étiquette par case ville, ancrée au slot <pos_coût> : prix (noir, libre)
+// ou loyer (couleur du proprio).
 const priceTags = computed(() =>
   board
     .filter((s) => s.type === 'ville')
@@ -92,11 +113,12 @@ const priceTags = computed(() =>
       const info = props.properties[cell.id] ?? props.properties[String(cell.id)];
       const ownerId = info?.ownerId ?? null;
       const amount = ownerId ? info?.rent : info?.price;
+      const slot = slotFor(cell);
       return {
         id: cell.id,
-        x: cell.x,
-        y: cell.y,
-        angle: tagAngle(cell),
+        x: slot.cost.x,
+        y: slot.cost.y,
+        angle: slot.angle,
         color: ownerId ? colorByPlayer.value[ownerId] ?? '#111' : '#111',
         label:
           amount == null

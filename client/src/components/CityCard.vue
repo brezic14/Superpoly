@@ -3,18 +3,17 @@
     <p class="city-kind">ville</p>
     <p class="city-title">{{ pending.detail.nom }} ({{ pending.detail.pays }})</p>
     <div class="city-rows">
-      <p>Loyer de base : <strong>{{ fmt(pending.detail.baseRent) }}</strong></p>
-      <p
-        v-for="n in 4"
-        :key="n"
-        class="city-rent-up"
-      >
-        Loyer {{ n }} amélioration{{ n > 1 ? 's' : '' }} : {{ fmt(pending.detail.rents[n - 1]) }}
+      <p>Loyer de base : <strong class="m-gain">{{ fmt(pending.detail.baseRent) }}</strong></p>
+      <p v-for="n in 4" :key="n">
+        Loyer {{ n }} amélioration{{ n > 1 ? 's' : '' }} :
+        <span class="m-gain">{{ fmt(pending.detail.rents[n - 1]) }}</span>
       </p>
-      <p>Coût : <strong>{{ fmt(pending.detail.price) }}</strong></p>
-      <p class="city-soft">
-        vente : {{ fmt(pending.detail.salePrice) }}
-        <span class="city-sep">amélioration : {{ fmt(pending.detail.upgradeCost) }}</span>
+      <p>Coût : <strong class="m-cost">{{ fmt(pending.detail.price) }}</strong></p>
+      <p>
+        vente : <span class="m-gain">{{ fmt(pending.detail.salePrice) }}</span>
+        <span class="city-sep"
+          >amélioration : <span class="m-cost">{{ fmt(pending.detail.upgradeCost) }}</span></span
+        >
       </p>
     </div>
     <div class="city-actions">
