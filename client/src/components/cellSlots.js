@@ -9,19 +9,15 @@
  * Réutilisable pour les futurs éléments (améliorations, gares...).
  */
 
-const COST_OFF = 2.8; // % plateau : distance centre -> slot coût (cas général)
-const COST_OFF_BOTTOM_OUTER = 1.2; // ligne du bas externe : pions déjà près du bord
-
-// Plages d'ids séquentielles (plateau 56 cases, sens horaire).
 const EDGES = [
-  { to: 8, orient: 'V', angle: -90, dx: COST_OFF, dy: 0 }, // 0-7   colonne gauche
-  { to: 19, orient: 'H', angle: 0, dx: 0, dy: COST_OFF }, // 8-18  ligne du haut
-  { to: 26, orient: 'V', angle: 90, dx: -COST_OFF, dy: 0 }, // 19-25  colonne droite
-  { to: 36, orient: 'H', angle: 0, dx: 0, dy: COST_OFF_BOTTOM_OUTER }, // 26-35 ligne du bas
-  { to: 39, orient: 'V', angle: -90, dx: COST_OFF, dy: 0 }, // 36-38 colonne gauche int.
-  { to: 47, orient: 'H', angle: 0, dx: 0, dy: COST_OFF }, // 39-46 ligne haute int.
-  { to: 50, orient: 'V', angle: 90, dx: -COST_OFF, dy: 0 }, // 47-49 colonne droite int.
-  { to: 56, orient: 'H', angle: 0, dx: 0, dy: COST_OFF }, // 50-55 ligne basse int.
+  { to: 8, angle: -90, dx: 2.8, dy: 0 }, // 0-7   colonne gauche
+  { to: 19, angle: 0, dx: 0, dy: 2.8 }, // 8-18  ligne du haut
+  { to: 26, angle: 90, dx: -2.8, dy: 0 }, // 19-25  colonne droite
+  { to: 36, angle: 0, dx: 0, dy: 3.0 }, // 26-35 ligne du bas (Maroc-Inde)
+  { to: 39, angle: -90, dx: 2.8, dy: 0 }, // 36-38 colonne gauche int.
+  { to: 47, angle: 0, dx: 0, dy: 8.0 }, // 39-46 ligne haute int. (USA)
+  { to: 50, angle: 90, dx: -2.8, dy: -1.2 }, // 47-49 colonne droite int.
+  { to: 56, angle: 0, dx: 0, dy: 2.0 }, // 50-55 ligne basse int. (France)
 ];
 
 export function edgeOf(id) {
@@ -32,7 +28,6 @@ export function edgeOf(id) {
 export function slotFor(cell) {
   const edge = edgeOf(cell.id);
   return {
-    orient: edge.orient,
     angle: edge.angle,
     pawn: { x: cell.x, y: cell.y },
     cost: { x: cell.x + edge.dx, y: cell.y + edge.dy },
