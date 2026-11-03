@@ -28,21 +28,6 @@
     >
       {{ tag.label }}
     </div>
-    <!-- Étiquettes prix/loyer : prix d'achat en noir si ville libre, sinon loyer
-         actuel de la couleur du propriétaire. Rotation selon le sens de marche. -->
-    <div
-      v-for="tag in priceTags"
-      :key="'tag-' + tag.id"
-      class="price-tag"
-      :style="{
-        left: tag.x + '%',
-        top: tag.y + '%',
-        color: tag.color,
-        transform: `translate(-50%, -50%) rotate(${tag.angle}deg)`,
-      }"
-    >
-      {{ tag.label }}
-    </div>
     <!-- Un pion par joueur : cercle couleur, position % depuis board.json.
          Pions superposés : seul le dernier arrivé visible (z-index = ordre d'arrivée). -->
     <div

@@ -1,31 +1,34 @@
 <template>
   <div class="frame">
-    <div class="lobby-top">
-      <span class="code-display">{{ displayCode }}</span>
-      <button class="copy-btn" @click="copyCode" title="Copier le code">CC</button>
-      <button
-        class="wire-btn primary"
-        :disabled="!canStart"
-        :title="startTitle"
-        @click="room.startGame()"
-      >
-        Démarrer
-      </button>
+    <div class="lobby-wrap">
+      <div class="lobby-top">
+        <span class="code-display">{{ displayCode }}</span>
+        <button class="copy-btn" @click="copyCode" title="Copier le code">CC</button>
+        <button
+          class="wire-btn primary"
+          :disabled="!canStart"
+          :title="startTitle"
+          @click="room.startGame()"
+        >
+          Démarrer
+        </button>
+      </div>
+
+      <PlayerList
+        :players="room.players"
+        :is-host="room.isHost"
+        :my-id="room.myPlayerId"
+        @kick="confirmKick"
+      />
     </div>
-    <p class="hint" v-if="copied">Code copié ! Partage-le à tes amis.</p>
-    <p class="hint" v-if="!room.isHost">Seul l'hôte peut démarrer et expulser.</p>
-    <p class="hint">{{ room.players.length }} / {{ room.maxPlayers }} joueurs</p>
 
-    <PlayerList
-      :players="room.players"
-      :is-host="room.isHost"
-      :my-id="room.myPlayerId"
-      @kick="confirmKick"
-    />
-
-    <p class="error">{{ room.error }}</p>
-    <p class="hint" v-if="room.starting">Partie en démarrage… (plateau : étape suivante)</p>
-    <p><button @click="leave">Quitter le salon</button></p>
+    <div class="lobby-meta">
+      <p class="hint" v-if="copied">Code copié ! Partage-le à tes amis.</p>
+      <p class="hint">{{ room.players.length }} / {{ room.maxPlayers }} joueurs</p>
+      <p class="error" v-if="room.error">{{ room.error }}</p>
+      <p class="hint" v-if="room.starting">Partie en démarrage…</p>
+      <button class="quit-link" @click="leave">Quitter le salon</button>
+    </div>
   </div>
 </template>
 

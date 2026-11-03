@@ -6,7 +6,7 @@
         <input
           v-model="pseudo"
           class="wire-input"
-          placeholder="nom"
+          placeholder="Nom"
           maxlength="20"
           autocomplete="nickname"
         />
@@ -16,15 +16,14 @@
         <input
           v-model="joinCode"
           class="wire-input"
-          placeholder="code"
+          placeholder="Code"
           maxlength="7"
           autocapitalize="characters"
           @input="joinCode = joinCode.toUpperCase()"
         />
       </div>
     </div>
-    <p class="error">{{ room.error }}</p>
-    <p class="hint">Ex de code : #212A4B — le # est ajouté automatiquement si tu l'oublies.</p>
+    <p class="error" v-if="room.error">{{ room.error }}</p>
   </div>
 </template>
 

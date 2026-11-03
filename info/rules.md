@@ -9,11 +9,11 @@ Superpoly est une version gratuite et en ligne du jeu Monopoly. Cette version re
 
 Comme sur un monopoly clasique, le but du jeu est d'acquerir des propriétés (des villes dans Superpoly) est d'augmenter son capital pour prendre le monopole de la partie. 
 
-Le jeu se déroule sur un plateau de jeu contenant 57 cases. Chaque joueur (lorsque c'est à son tour de jouer) lance deux dés et avance de tant de cases données par la somme des deux montant des dés, il suit ensuite les instructions donnée par la case.
+Le jeu se déroule sur un plateau de jeu contenant 56 cases. Chaque joueur (lorsque c'est à son tour de jouer) lance deux dés et avance de tant de cases données par la somme des deux montant des dés, il suit ensuite les instructions donnée par la case.
 Il existe plusieurs types de case :
 - 1 case départ
 - 1 case intermédiare
-- 44 cases ville
+- 32 cases ville
 - 1 case prison ou simple visite
 - 3 cases gare
 - 3 cases aéroport

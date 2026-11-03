@@ -22,3 +22,22 @@ Reste à faire côté Vercel (impossible depuis ici)
 2. Deployments → Redeploy le dernier déploiement pour que les fonctions api/* prennent les variables.
 3. Tester sur https://superpoly.vercel.app : créer une partie dans un navigateur, rejoindre avec le code dans un second (ou onglet privé) — la liste doit se synchroniser via le polling.
 Note : garde le token hors du chat/git à l'avenir — il est maintenant uniquement dans ton server/.env local et (après l'étape 1) dans Vercel.
+
+
+
+
+Terminal 1 — serveur (port 3000)
+cd C:\Users\brvnr\Documents\personnel\TrashCoding\Superpoly
+npm run dev:server
+Tu dois voir : [superpoly-server] REST listening on :3000. Ce mode (node --watch) recharge tout seul quand tu modifies le serveur — mais comme ton process datait d'avant mes changements, il faut le relancer une fois.
+Terminal 2 — client Vite (port 5173)
+cd C:\Users\brvnr\Documents\personnel\TrashCoding\Superpoly
+npm run dev:client
+Ouvre ensuite http://localhost:5173. Vite, lui, ne recharge pas sa config tout seul : le redémarrage est obligatoire pour activer le proxy /api ajouté.
+Pour redémarrer (quand c'est déjà lancé)
+1. Clique dans le terminal concerné, appuie sur Ctrl+C.
+2. Si ça ne s'arrête pas : Get-Process node | Stop-Process.
+3. Relance la commande correspondante.
+Ensuite
+1. Recrée un salon (l'ancien en mémoire n'a pas d'état game).
+2. Teste le lancer : si une erreur persiste, elle affiche maintenant le vrai motif au lieu d'« Erreur partie » — envoie-le-moi tel quel.

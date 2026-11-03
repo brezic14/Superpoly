@@ -9,7 +9,7 @@
         title="Expulser"
         @click="$emit('kick', p.id)"
       >
-        ×
+        ✕
       </button>
     </div>
   </div>
