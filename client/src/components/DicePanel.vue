@@ -7,6 +7,15 @@
     <p class="state-desc" v-if="lastRoll">De {{ caseName(lastRoll.from) }} vers {{ caseName(lastRoll.to) }}</p>
     <p class="state-desc info" v-if="lastRoll?.isDouble && !lastRoll?.sentToPrison">Double ! Rejouez.</p>
     <p class="state-desc info" v-if="lastRoll?.sentToPrison">3 doubles… direction la prison !</p>
+    <p class="state-desc rent" v-if="rent">
+      <template v-if="rent.amount > 0">
+        Loyer payé : <span class="m-cost">{{ fmt(rent.amount) }}</span> à {{ rent.ownerPseudo }}
+      </template>
+      <template v-else>
+        Loyer impayé : <span class="m-cost">{{ fmt(rent.due) }}</span> à {{ rent.ownerPseudo }}
+      </template>
+      <span v-if="rent.amount < rent.due"> (solde insuffisant)</span>
+    </p>
     <p class="state-desc info" v-if="pending">En attente du choix passer / acheter…</p>
     <button class="wire-btn dice-btn" :disabled="!canRoll || rolling || animating" @click="$emit('roll')">
       {{ rolling ? 'Lancer…' : 'lancer les dés' }}
@@ -31,6 +40,11 @@ const props = defineProps({
 defineEmits(['roll']);
 
 const canRoll = computed(() => props.isMyTurn && !props.animating && !props.rolling && !props.pending);
+const rent = computed(() => props.lastRoll?.rentPayment ?? null);
+
+function fmt(n) {
+  return `${Number(n ?? 0).toLocaleString('fr-FR')}€`;
+}
 
 // Nom de case pour vérifier visuellement chaque déplacement (ex. "De Lille vers Florence").
 function caseName(id) {

@@ -1,6 +1,6 @@
 import { ServiceError } from '../lobby/service.js';
 import { publicChat, pushSystemMessage } from '../chat/utils.js';
-import { CITIES, cityDetail, isCity } from './cities.js';
+import { CITIES, cityDetail, isCity, rentDue } from './cities.js';
 
 /**
  * Moteur de jeu MVP — déplacement + achat de villes libres (aucun autre effet).
@@ -199,6 +199,30 @@ export function rollDice(room, { token, randomFn = Math.random } = {}) {
   }
 
   g.players[me.id].square = to;
+
+  // Loyer : atterrissage sur la ville d'un autre joueur. Le montant est doublé
+  // si le propriétaire possède toutes les villes du pays (rentDue/currentRent).
+  let rentPayment = null;
+  if (!sentToPrison) {
+    const due = rentDue(to, g.ownership, me.id);
+    const owner = due ? g.players[due.ownerId] ?? null : null;
+    if (due && owner) {
+      const payer = g.players[me.id];
+      const amount = Math.min(due.amount, Math.max(0, payer.money ?? 0));
+      if (amount > 0) {
+        payer.money -= amount;
+        owner.money += amount;
+      }
+      rentPayment = {
+        payerId: me.id,
+        ownerId: due.ownerId,
+        ownerPseudo: owner.pseudo,
+        amount,
+        due: due.amount,
+      };
+    }
+  }
+
   g.lastRoll = {
     playerId: me.id,
     d1,
@@ -210,10 +234,10 @@ export function rollDice(room, { token, randomFn = Math.random } = {}) {
     doublesCount,
     mustRollAgain,
     sentToPrison,
+    rentPayment,
   };
 
   // Ville libre -> choix passer/acheter, le tour attend la résolution.
-  // (Pas de loyer ni d'effet : périmètre de cette étape.)
   // Note : la prison a déjà avancé le tour dans sa branche (un seul avancement).
   if (!sentToPrison && isCity(to) && !g.ownership[to]?.ownerId) {
     g.pending = { type: 'buy', playerId: me.id, square: to };
@@ -229,6 +253,19 @@ export function rollDice(room, { token, randomFn = Math.random } = {}) {
   if (sentToPrison) rollText += ' Direction prison !';
   else if (mustRollAgain) rollText += ' Double, rejoue !';
   pushSystemMessage(room, rollText);
+
+  if (rentPayment) {
+    if (rentPayment.amount > 0) {
+      let rentText = `${roller.pseudo} a payé ${rentPayment.amount.toLocaleString('fr-FR')}€ de loyer à ${rentPayment.ownerPseudo}`;
+      if (rentPayment.amount < rentPayment.due) rentText += ' (solde insuffisant)';
+      pushSystemMessage(room, `${rentText}.`);
+    } else {
+      pushSystemMessage(
+        room,
+        `${roller.pseudo} n'a pas assez pour payer le loyer de ${rentPayment.due.toLocaleString('fr-FR')}€ à ${rentPayment.ownerPseudo}.`
+      );
+    }
+  }
 
   return { d1, d2, total, game: publicGame(room, me.id), chat: publicChat(room) };
 }

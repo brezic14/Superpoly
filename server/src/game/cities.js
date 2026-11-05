@@ -77,6 +77,25 @@ export function ownsWholeCountry(ownership, playerId, square) {
   return citiesOfCountry(city.pays).every((sq) => ownership[sq]?.ownerId === playerId);
 }
 
+/**
+ * Loyer dû quand `payerId` atterrit sur la ville `square` possédée par un autre.
+ * Retourne null si la case n'est pas une ville, n'a pas de propriétaire, ou si
+ * le propriétaire est le joueur lui-même.
+ */
+export function rentDue(square, ownership, payerId) {
+  const city = getCity(square);
+  if (!city || !payerId) return null;
+  const own = ownership ?? {};
+  const ownerId = own[square]?.ownerId ?? null;
+  if (!ownerId || ownerId === payerId) return null;
+  return {
+    ownerId,
+    amount: currentRent(city.prix, {
+      fullCountry: ownsWholeCountry(own, ownerId, square),
+    }),
+  };
+}
+
 /** Loyer actuel affiché sur le plateau pour une case (0 si libre — on affiche le prix). */
 export function rentOf(square, ownership) {
   const city = getCity(square);

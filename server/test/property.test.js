@@ -72,6 +72,7 @@ describe('achat villes libres', () => {
     assert.ok(res.game.pending);
     assert.equal(res.game.pending.square, 3);
     assert.equal(res.game.pending.detail.nom, 'Venise');
+    assert.equal(res.game.lastRoll.rentPayment, null);
     assert.equal(room.game.currentIndex, 0); // tour bloqué
   });
 
@@ -150,6 +151,82 @@ describe('achat villes libres', () => {
     // Sans pays complet : base seule.
     delete room.game.ownership[3];
     assert.equal(publicProperties(room)[1].rent, 500);
+  });
+
+  it('atterrissage sur la ville d’un autre -> loyer payé, tour avancé', async () => {
+    const { room, host, guest } = await twoPlayerStarted();
+    room.game.ownership[3] = { ownerId: guest.id }; // Venise
+    const hostBefore = room.game.players[host.id].money;
+    const guestBefore = room.game.players[guest.id].money;
+    const { res } = forceRoll(room, 1, 2); // -> 3 (Venise)
+    assert.equal(res.game.lastRoll.to, 3);
+    assert.equal(res.game.lastRoll.rentPayment.amount, 500);
+    assert.equal(res.game.lastRoll.rentPayment.ownerId, guest.id);
+    assert.equal(room.game.players[host.id].money, hostBefore - 500);
+    assert.equal(room.game.players[guest.id].money, guestBefore + 500);
+    assert.equal(room.game.currentIndex, 1);
+    assert.ok(res.chat.messages.some((m) => m.text.includes('loyer') && m.text.includes('500')));
+  });
+
+  it('loyer doublé quand le propriétaire possède tout le pays', async () => {
+    const { room, host, guest } = await twoPlayerStarted();
+    for (const sq of [1, 3, 5, 6]) room.game.ownership[sq] = { ownerId: guest.id };
+    const hostBefore = room.game.players[host.id].money;
+    const guestBefore = room.game.players[guest.id].money;
+    const { res } = forceRoll(room, 1, 2); // -> Venise
+    assert.equal(res.game.lastRoll.rentPayment.due, 1000); // 500 x2
+    assert.equal(res.game.lastRoll.rentPayment.amount, 1000);
+    assert.equal(room.game.players[host.id].money, hostBefore - 1000);
+    assert.equal(room.game.players[guest.id].money, guestBefore + 1000);
+  });
+
+  it('sa propre ville -> aucun loyer, tour avancé', async () => {
+    const { room, host } = await twoPlayerStarted();
+    room.game.ownership[3] = { ownerId: host.id };
+    const before = room.game.players[host.id].money;
+    const { res } = forceRoll(room, 1, 2); // -> Venise
+    assert.equal(res.game.lastRoll.rentPayment, null);
+    assert.equal(room.game.players[host.id].money, before);
+    assert.equal(room.game.currentIndex, 1);
+  });
+
+  it('double + ville adverse -> loyer payé puis relance', async () => {
+    const { room, host, guest } = await twoPlayerStarted();
+    room.game.players[host.id].square = 55;
+    room.game.ownership[1] = { ownerId: guest.id }; // Milan
+    const guestBefore = room.game.players[guest.id].money;
+    const seq = [die(1), die(1)]; // 55 + 2 = 57 % 56 = 1
+    let i = 0;
+    const r = rollDice(room, { token: host.token, randomFn: () => seq[i++ % 2] });
+    assert.equal(r.game.lastRoll.to, 1);
+    assert.equal(r.game.lastRoll.mustRollAgain, true);
+    assert.equal(r.game.lastRoll.rentPayment.amount, 500);
+    assert.equal(room.game.players[guest.id].money, guestBefore + 500);
+    assert.equal(room.game.currentIndex, 0);
+  });
+
+  it('fonds insuffisants -> tout le solde payé, joueur maintenu', async () => {
+    const { room, host, guest } = await twoPlayerStarted();
+    room.game.ownership[3] = { ownerId: guest.id };
+    room.game.players[host.id].money = 300;
+    const guestBefore = room.game.players[guest.id].money;
+    const { res } = forceRoll(room, 1, 2); // -> Venise, loyer 500
+    assert.equal(room.game.players[host.id].money, 0);
+    assert.equal(room.game.players[guest.id].money, guestBefore + 300);
+    assert.equal(res.game.lastRoll.rentPayment.amount, 300);
+    assert.equal(res.game.lastRoll.rentPayment.due, 500);
+    assert.ok(room.game.order.includes(host.id));
+    assert.ok(res.chat.messages.some((m) => m.text.includes('solde insuffisant')));
+  });
+
+  it('case non-ville -> aucun loyer', async () => {
+    const { room, host } = await twoPlayerStarted();
+    room.game.players[host.id].square = 55;
+    const before = room.game.players[host.id].money;
+    const { res } = forceRoll(room, 1, 2); // 55 + 3 = 58 % 56 = 2 (Taxe)
+    assert.equal(res.game.lastRoll.to, 2);
+    assert.equal(res.game.lastRoll.rentPayment, null);
+    assert.equal(room.game.players[host.id].money, before);
   });
 
   it('properties exposées via publicGame et résumé salon', async () => {
