@@ -1,46 +1,85 @@
 # Superpoly
 
-Version en ligne du Monopoly (Vue.js + Node.js). Règles : voir `rules.md`.
-Logique métier : `docs/uml/instance.puml` (pur, inchangé). Salon réseau : `docs/uml/lobby.puml`.
+Superpoly est une adaptation web gratuite et multijoueur, inspirée du Monopoly.
+Les joueurs s'affrontent sur un plateau de 56 cases : ils lancent les dés,
+achètent des villes, encaissent des loyers et tentent de prendre le monopole de
+la partie.
 
-## Lot actuel : accueil + salon (5 joueurs max, hôte inclus)
+## Jouer en ligne
 
-- Accueil (`/`) : `Créer une partie` + champ `nom`, `Rejoindre une partie` + champ `code`.
-- Salon (`/salon/#XXXXXX`) : affichage `#code`, bouton `CC` (copier), bouton `Démarrer`
-  (hôte seul, 2 joueurs min), liste joueurs avec croix d'expulsion (hôte seul).
-- Code salon : `#` + 6 caractères `[0-9A-Z]` (ex `#212A4B`). Saisie tolérante
-  (minuscules, `#` oublié).
-- Hôte qui quitte → le doyen (premier arrivé) devient hôte.
-- Transport : **REST + polling 2s** (compatible serverless, pas de WebSocket).
-  Chaque joueur reçoit un token secret à la création/rejoin (persisté en
-  `localStorage`), le kick se fait par id joueur.
+Le jeu est disponible ici : **https://superpoly.vercel.app**
 
-## Lancer en local
+Dans la page d'accueil, il est possible de créer une partie ou d'en rejoindre
+une à l'aide d'un code. Une fois dans le salon, le code peut être partagé avec
+d'autres joueurs. La partie peut ensuite commencer : les joueurs lancent les dés,
+achètent des villes et développent leur capital.
 
-```bash
-npm run install:all
-# terminal 1
-npm run dev:server   # http://localhost:3000 (+ /api/health)
-# terminal 2 : avec VITE_SERVER_URL=http://localhost:3000 (voir client/.env.example)
-npm run dev:client   # http://localhost:5173
+## Fonctionnalités
+
+- Salons jusqu'à 5 joueurs avec code de partie.
+- Chat et messages système pendant la partie.
+- Plateau de 56 cases avec pions colorés et déplacement animé.
+- Lancer de deux dés, gestion des doubles et des 3 doubles.
+- Achat de villes libres.
+- Paiement des loyers au propriétaire.
+- Loyer doublé lorsque le propriétaire possède toutes les villes d'un pays.
+- Fiche détaillée des villes et affichage des prix et loyers sur le plateau.
+
+## À venir
+
+- Gares, aéroports et services.
+- Cases taxes, chance, cagnotte, policier et prison complète.
+- Améliorations et revente de villes.
+- Négociations, échanges, alliances, marché noir et privilèges.
+- Faillite, élimination et victoire.
+
+## Stack technique
+
+- **Front-end** : Vue.js
+- **Back-end** : Node.js
+- **Communication** : API REST avec actualisation régulière
+- **Stockage** : Upstash Redis
+- **Hébergement** : Vercel
+
+### Arborescence du projet
+
+```text
+Superpoly/
+├─ api/                     # Fonctions serverless (Vercel)
+│  ├─ health.js
+│  └─ rooms/                # create, join, state, leave, kick, start, roll, buy, pass, chat
+├─ client/                  # Application Vue.js
+│  ├─ src/
+│  │  ├─ assets/            # Plateau, logos et images
+│  │  ├─ components/        # Plateau, dés, cartes, chat, joueurs
+│  │  ├─ data/board.json    # Données des 56 cases
+│  │  ├─ router/            # Routes de l'application
+│  │  ├─ stores/            # État du salon, du jeu et du chat
+│  │  ├─ views/             # Accueil, salon, partie
+│  │  ├─ App.vue
+│  │  ├─ main.js
+│  │  └─ style.css
+│  ├─ index.html
+│  ├─ package.json
+│  └─ vite.config.js
+├─ server/                  # Serveur Node.js
+│  ├─ src/
+│  │  ├─ chat/              # Chat et messages système
+│  │  ├─ game/              # Plateau, villes et loyers
+│  │  ├─ lobby/             # Salons et joueurs
+│  │  ├─ routes/            # Routes REST
+│  │  ├─ apiLib.js
+│  │  ├─ config.js
+│  │  └─ index.js
+│  ├─ test/                 # Tests du serveur
+│  ├─ .env.example
+│  └─ package.json
+├─ index.html
+├─ package.json
+├─ vercel.json
+└─ README.md
 ```
 
-Variables : `server/.env` (voir `.env.example` : `PORT`, `CLIENT_ORIGIN`, `MAX_PLAYERS=5`,
-`ROOM_TTL_SECONDS`, `UPSTASH_*` pour la prod).
-Front : `VITE_SERVER_URL` vide = même domaine (prod Vercel), `http://localhost:3000` en dev.
+---
 
-## Déploiement Vercel (superpoly.vercel.app)
-
-- Build front : `vercel.json` (`client/dist`, rewrite SPA `/salon/:code` → `/`).
-- API salon : fonctions `api/rooms/*` (même logique que l'Express local).
-- **Variables Vercel requises** : `UPSTASH_REDIS_REST_URL` + `UPSTASH_REDIS_REST_TOKEN`
-  (base Upstash Redis, free tier suffit — sans elles, le stockage retombe en mémoire,
-  non partagé entre instances serverless : salons fantômes possibles).
-- Sans Upstash, tout fonctionne en mono-instance (dev local) mais pas en prod.
-
-## Tests
-
-```bash
-npm run test:server        # unitaires code + service salon (mémoire)
-npm run build:client       # build Vite
-```
+Projet personnel réalisé avec Vue.js et Node.js.
