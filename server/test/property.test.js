@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { MemoryRoomStore } from '../src/lobby/restStore.js';
 import { ServiceError, createRoom, joinRoom, publicRoom } from '../src/lobby/service.js';
 import {
+  START_BONUS,
   advanceTurn,
   initGame,
   publicGame,
@@ -219,12 +220,27 @@ describe('achat villes libres', () => {
     assert.ok(res.chat.messages.some((m) => m.text.includes('solde insuffisant')));
   });
 
+  it('bonus Départ crédité avant le loyer', async () => {
+    const { room, host, guest } = await twoPlayerStarted();
+    room.game.players[host.id].square = 54;
+    room.game.ownership[1] = { ownerId: guest.id }; // Milan
+    const hostBefore = room.game.players[host.id].money;
+    const guestBefore = room.game.players[guest.id].money;
+    const { res } = forceRoll(room, 1, 2); // 54 + 3 = 57 % 56 = 1
+    assert.equal(res.game.lastRoll.to, 1);
+    assert.equal(res.game.lastRoll.passedStart, true);
+    assert.equal(res.game.lastRoll.startBonus, START_BONUS);
+    assert.equal(res.game.lastRoll.rentPayment.amount, 500);
+    assert.equal(room.game.players[host.id].money, hostBefore + START_BONUS - 500);
+    assert.equal(room.game.players[guest.id].money, guestBefore + 500);
+  });
+
   it('case non-ville -> aucun loyer', async () => {
     const { room, host } = await twoPlayerStarted();
-    room.game.players[host.id].square = 55;
+    room.game.players[host.id].square = 7;
     const before = room.game.players[host.id].money;
-    const { res } = forceRoll(room, 1, 2); // 55 + 3 = 58 % 56 = 2 (Taxe)
-    assert.equal(res.game.lastRoll.to, 2);
+    const { res } = forceRoll(room, 1, 2); // 7 + 3 = 10 (Chance)
+    assert.equal(res.game.lastRoll.to, 10);
     assert.equal(res.game.lastRoll.rentPayment, null);
     assert.equal(room.game.players[host.id].money, before);
   });

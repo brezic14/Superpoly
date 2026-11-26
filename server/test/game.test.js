@@ -2,7 +2,7 @@ import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { MemoryRoomStore } from '../src/lobby/restStore.js';
 import { createRoom, joinRoom, startRoom } from '../src/lobby/service.js';
-import { BOARD_SIZE, PRISON_SQUARE, getGameState, initGame, publicGame, rollDice } from '../src/game/service.js';
+import { BOARD_SIZE, PRISON_SQUARE, START_BONUS, getGameState, initGame, publicGame, rollDice } from '../src/game/service.js';
 
 async function twoPlayerRoom() {
   const store = new MemoryRoomStore();
@@ -11,6 +11,14 @@ async function twoPlayerRoom() {
   const started = await startRoom(store, { code: room.code, token: me.token });
   const saved = await store.get(room.code);
   return { store, room: saved, host: me, guest: j2.me, started };
+}
+
+const die = (d) => (d - 1 + 0.5) / 6;
+
+function currentToken(room) {
+  const id = room.game.order[room.game.currentIndex];
+  const player = room.players.find((p) => p.id === id);
+  return { id, token: player.token };
 }
 
 describe('moteur jeu (déplacement seul)', () => {
@@ -87,6 +95,80 @@ describe('moteur jeu (déplacement seul)', () => {
       assert.equal(r.game.lastRoll.from, from);
       assert.equal(r.game.lastRoll.to, expected);
     }
+  });
+
+  it('passage par la case Départ -> bonus 25 000', async () => {
+    const { room } = await twoPlayerRoom();
+    const { id, token } = currentToken(room);
+    room.game.players[id].square = 54;
+    const before = room.game.players[id].money;
+    const seq = [die(1), die(2)]; // 54 + 3 = 57 % 56 = 1
+    let i = 0;
+    const r = rollDice(room, { token, randomFn: () => seq[i++ % 2] });
+    assert.equal(r.total, 3);
+    assert.equal(r.game.lastRoll.to, 1);
+    assert.equal(r.game.lastRoll.passedStart, true);
+    assert.equal(r.game.lastRoll.startBonus, START_BONUS);
+    assert.equal(room.game.players[id].money, before + START_BONUS);
+    assert.ok(r.chat.messages.some((m) => m.text.includes('case Départ') && m.text.includes('25')));
+  });
+
+  it('arrêt pile sur la case Départ -> bonus + relance', async () => {
+    const { room } = await twoPlayerRoom();
+    const { id, token } = currentToken(room);
+    room.game.players[id].square = 54;
+    const before = room.game.players[id].money;
+    const seq = [die(1), die(1)]; // 54 + 2 = 56 % 56 = 0 (double)
+    let i = 0;
+    const r = rollDice(room, { token, randomFn: () => seq[i++ % 2] });
+    assert.equal(r.game.lastRoll.to, 0);
+    assert.equal(r.game.lastRoll.passedStart, true);
+    assert.equal(r.game.lastRoll.mustRollAgain, true);
+    assert.equal(room.game.players[id].money, before + START_BONUS);
+    assert.ok(r.chat.messages.some((m) => m.text.includes('arrive sur la case Départ')));
+  });
+
+  it('aucun bonus de Départ au premier lancer depuis la case 0', async () => {
+    const { room } = await twoPlayerRoom();
+    const { id, token } = currentToken(room);
+    room.game.players[id].square = 0;
+    const before = room.game.players[id].money;
+    const seq = [die(1), die(2)]; // -> 3, sans tour complet
+    let i = 0;
+    const r = rollDice(room, { token, randomFn: () => seq[i++ % 2] });
+    assert.equal(r.game.lastRoll.passedStart, false);
+    assert.equal(r.game.lastRoll.startBonus, 0);
+    assert.equal(room.game.players[id].money, before);
+  });
+
+  it('déplacement normal sans tour complet -> aucun bonus', async () => {
+    const { room } = await twoPlayerRoom();
+    const { id, token } = currentToken(room);
+    room.game.players[id].square = 10;
+    const before = room.game.players[id].money;
+    const seq = [die(1), die(2)]; // -> 13
+    let i = 0;
+    const r = rollDice(room, { token, randomFn: () => seq[i++ % 2] });
+    assert.equal(r.game.lastRoll.to, 13);
+    assert.equal(r.game.lastRoll.passedStart, false);
+    assert.equal(r.game.lastRoll.startBonus, 0);
+    assert.equal(room.game.players[id].money, before);
+  });
+
+  it('3 doubles -> prison sans bonus même si la distance croise le Départ', async () => {
+    const { room } = await twoPlayerRoom();
+    const { id, token } = currentToken(room);
+    room.game.players[id].square = 54;
+    room.game.lastRoll = { playerId: id, doublesCount: 2 };
+    const before = room.game.players[id].money;
+    const seq = [die(1), die(1)]; // 54 + 2 : croiserait 0, mais envoi direct en prison
+    let i = 0;
+    const r = rollDice(room, { token, randomFn: () => seq[i++ % 2] });
+    assert.equal(r.game.lastRoll.sentToPrison, true);
+    assert.equal(r.game.lastRoll.passedStart, false);
+    assert.equal(r.game.lastRoll.startBonus, 0);
+    assert.equal(room.game.players[id].money, before);
+    assert.equal(room.game.players[id].square, PRISON_SQUARE);
   });
 
   it('gid : chaque démarrage incrémente, exposé en vue publique', () => {

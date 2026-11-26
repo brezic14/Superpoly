@@ -5,6 +5,9 @@
     <p class="state-desc">{{ description }}</p>
     <p class="dice-result" v-if="lastRoll">{{ lastRoll.d1 }} + {{ lastRoll.d2 }} = {{ lastRoll.total }}</p>
     <p class="state-desc" v-if="lastRoll">De {{ caseName(lastRoll.from) }} vers {{ caseName(lastRoll.to) }}</p>
+    <p class="state-desc" v-if="lastRoll?.startBonus">
+      Case Départ : <span class="m-gain">+{{ fmt(lastRoll.startBonus) }}</span>
+    </p>
     <p class="state-desc info" v-if="lastRoll?.isDouble && !lastRoll?.sentToPrison">Double ! Rejouez.</p>
     <p class="state-desc info" v-if="lastRoll?.sentToPrison">3 doubles… direction la prison !</p>
     <p class="state-desc rent" v-if="rent">

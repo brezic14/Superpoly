@@ -21,6 +21,8 @@ import { CITIES, cityDetail, isCity, rentDue } from './cities.js';
 
 export const BOARD_SIZE = 56;
 export const START_MONEY = 200000;
+/** Gain en passant par (ou en s'arrêtant sur) la case Départ. */
+export const START_BONUS = 25000;
 /** Case "simple visite / prison" (coin haut-gauche du plateau visuel). */
 export const PRISON_SQUARE = 7;
 
@@ -37,6 +39,11 @@ function shuffle(arr, randomFn = Math.random) {
 
 function rollDie(randomFn = Math.random) {
   return 1 + Math.floor(randomFn() * 6);
+}
+
+/** Le déplacement traverse-t-il (ou termine-t-il sur) la case Départ ? */
+function passesStart(from, total) {
+  return total > 0 && from + total >= BOARD_SIZE;
 }
 
 /** Initialise room.game au démarrage (ordre mélangé, tous case 0). */
@@ -198,7 +205,12 @@ export function rollDice(room, { token, randomFn = Math.random } = {}) {
     mustRollAgain = false;
   }
 
+  // Bonus case Départ : traversée ou arrêt pile sur la case 0. Exclu en cas
+  // d'envoi forcé en prison (3 doubles).
+  const passedStart = !sentToPrison && passesStart(from, total);
+
   g.players[me.id].square = to;
+  if (passedStart) g.players[me.id].money += START_BONUS;
 
   // Loyer : atterrissage sur la ville d'un autre joueur. Le montant est doublé
   // si le propriétaire possède toutes les villes du pays (rentDue/currentRent).
@@ -234,6 +246,8 @@ export function rollDice(room, { token, randomFn = Math.random } = {}) {
     doublesCount,
     mustRollAgain,
     sentToPrison,
+    passedStart,
+    startBonus: passedStart ? START_BONUS : 0,
     rentPayment,
   };
 
@@ -253,6 +267,11 @@ export function rollDice(room, { token, randomFn = Math.random } = {}) {
   if (sentToPrison) rollText += ' Direction prison !';
   else if (mustRollAgain) rollText += ' Double, rejoue !';
   pushSystemMessage(room, rollText);
+
+  if (passedStart) {
+    const where = to === 0 ? 'arrive sur la case Départ' : 'passe par la case Départ';
+    pushSystemMessage(room, `${roller.pseudo} ${where} et reçoit ${START_BONUS.toLocaleString('fr-FR')}€.`);
+  }
 
   if (rentPayment) {
     if (rentPayment.amount > 0) {
